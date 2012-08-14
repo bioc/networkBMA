@@ -1,0 +1,14 @@
+Package: networkBMA
+Version: 0.99.3
+Date: 2012--08--01
+Author: Chris Fraley, Ka Yee Yeung, Adrian Raftery
+               (with contributions from Kenneth Lo and Chad Young)
+Title: Regression-based network inference using Bayesian Model Averaging
+Description: An extension of Bayesian Model Averaging (BMA) for network 
+                construction using time series gene expression data.
+                Includes assessment functions and sample test data.
+Depends: R (>= 2.15.0), stats, utils, BMA
+License: GPL (>= 2)
+Maintainer: Chris Fraley <fraley@stat.washington.edu>
+BiocViews: GraphsAndNetworks, NetworkInference
+Packaged: 2012-08-09 18:51:34 UTC; pshannon

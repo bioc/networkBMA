@@ -1,0 +1,304 @@
+\documentclass[12pt]{article}
+%\documentclass[epsf]{siamltex}
+
+\setlength{\topmargin}{0in}
+\setlength{\topskip}{0in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+%\setlength{\footheight}{0in}
+%\setlength{\footskip}{0in}
+\setlength{\textheight}{9in}
+\setlength{\textwidth}{6.5in}
+\setlength{\baselineskip}{20pt}
+\setlength{\leftmargini}{1.5em}
+\setlength{\leftmarginii}{1.5em}
+\setlength{\leftmarginiii}{1.5em}
+\setlength{\leftmarginiv}{1.5em}
+
+\usepackage{epsfig,subfigure,lscape}
+
+\renewcommand\theequation{\thesection.\arabic{equation}}
+
+\def\hb{\hfil\break}
+
+\def\ib{$\bullet$}
+
+%\VignetteIndexEntry{networkBMA}
+ 
+\begin{document}
+\pagestyle{plain}
+
+
+%Goadrich&2004,KokDomingos2005,SinglaDomingos2005,
+
+\nocite{Brem&2002,BremKruglyak2005,Yeung&2005,Yeung&2011,Lo&2011,YEASTRACT,Hoeting&1999,BMApackage,iterativeBMApackage,networkBMApackage,SCPD,YPD,ArrayExpress}
+
+\begin{center}
+{\bf Uncovering gene regulatory relationships using {\tt networkBMA}}\\[5pt]
+Ka Yee Yeung, Chris Fraley, Adrian E. Raftery\\
+Departments of Microbiology (KYY) and Statistics (CF and AER)\\
+University of Washington
+\end{center}
+
+\bigskip
+
+This document illustrates the use of the {\tt networkBMA} R package 
+(Fraley et~al. 2012) to uncover regulatory relationships in yeast 
+({\it Saccharomyces cerevisiae}) from
+microarray data measuring time-dependent gene-expression levels in 95 
+genotyped yeast segregants subjected to a drug (rapamycin) perturbation.
+
+\section{Data}
+
+The expression data for this vignette is provided in the {\tt networkBMA} 
+package in the {\tt vignette} 
+database, which consists of three R objects:
+\begin{itemize}
+\item[]{\tt timeSeries}:
+       A 582 by 102 data frame in which the first two columns are factors 
+       identifying the replicate and time (in minutes) after drug perturbation,
+       and the remaining 100 columns are the expression measurements  for a
+       subset of 100 genes from the yeast-rapamycin experiment described in 
+       Yeung et~al. (2011).
+       There are 582/6 = 97 replicates (the 95 segregants plus two 
+       parental strains of the segregants), each with measurements at 
+       6 time points.
+The complete time series data is available from Array Express 
+(Parkinson et~al. 2007) with accession number 
+E-MTAB-412 \\
+(http://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-412).
+\item[] {\tt reg.known}:
+ A 18 by 3 data frame giving known regulatory relationships among this
+ subset of 100 genes. The first two columns
+        give the regulator and target gene, respectively, 
+        while the third encodes 
+        the source of the regulatory information ({\tt `YPD'}
+         for Yeast Proteome Database (Hodges et~al. 1999) and {\tt `SCPD'} for
+          The Promoter Database of \emph{Saccharomyces cerevisiae}
+            (Zhu and Zhang 1999).
+        In this example, we constrained {\tt reg.known} to high-confidence 
+        experimental results obtained from biochemical 
+       (non-high-throughput) experiments.
+\item[] {\tt reg.prob}:
+A 100 by 100 matrix, giving probability estimates for regulatory 
+relationships in which the $(i,j)$ entry 
+gives the estimated probability that gene $i$ regulates gene $j$.
+These were computed using the supervised framework integrating multiple 
+data sources of Lo et~al. (2011).
+\item[] {\tt referencePairs}:
+ A 2-column data frame giving 287 regulator-gene pairs 
+among the selected set of 100 genes reported from the literature.
+In this yeast example, the reference network was extracted from the documented
+evidence from the {\tt YEASTRACT} database (Teixeira et~al. 2006), which
+includes curated regulatory relationships from the literature 
+inferred from high-throughput experiments.
+\item[] {\tt brem.data}: An 85 by 111 
+subset of the data used for network inference in
+yeast (Brem et~al. 2002, Brem and Kruglyak 2005).
+The rows correspond to genes and the columns to experiments.
+Provided courtesy of Rachel Brem.
+\end{itemize}
+<<vignette.data>>= 
+library(networkBMA)
+data(vignette)
+
+dim(timeSeries)
+dim(reg.prob)
+dim(brem.data)
+reg.known
+@
+
+\section{Network Modeling}
+Given the yeast expression data from the Rapamycin experiments, the
+{\tt networkBMA} function can be invoked to estimate the probabilities
+of regulatory relationships using iterative Bayesian Model Averaging 
+(Yeung et~al. 2005, 2011):
+<<networkBMA>>=
+edges <- networkBMA(data = timeSeries[,-(1:2)], 
+                    nTimePoints = length(unique(timeSeries$time)), 
+                    prior.prob = reg.prob, known = reg.known, 
+                    nvar = 50, ordering = "bic1+prior")
+edges[1:9,]
+@
+For each gene $g$, the observed gene expression of genes at time $t-1$ serve 
+as linear predictors for modeling the observed expression of gene $g$ at time 
+$t$. BMA modeling results in a weighted average of models consisting of 
+relatively small numbers of predictors. The probability of gene $h$ being a 
+linear predictor in the model for gene $g$ is taken as the probability that 
+gene $h$ regulates gene $g$ in the network.
+
+There are options for including known regulatory relationships 
+and prior priobabilities in the modeling (see Lo et~al. 2011), 
+as well as for ordering the variables,
+and for specifying 
+the number of ordered variables to be included in the modeling.
+
+\section{Assessment of Network Models}
+
+Although, except for synthetic data,  the true underlying network is unknown,
+the results can be assessed 
+using a set of regulator-target gene network edges reported in the literature.
+The comparison is done as follows:
+\begin{itemize}
+\item Let $E$ be the set of  regulator-target
+gene edges resulting from {\tt networkBMA}, possibly reduced using a
+probability  threshold. In the context of the example in Section 2, 
+$E$ corresponds to the set of edges represented in the object {\tt edges}.
+\item Let $K$ be the set of known regulator-target gene
+edges hardcoded in the modeling. 
+In the example in Section 2, $K$ corresponds to {\tt reg.known}.
+\item Let $L$ be the set regulator-target gene edges reported in the 
+literature. In the example in Section 2, $L$ corresponds to 
+{\tt referencePairs}.
+\item Let $E \backslash K$ and $L \backslash K$ be the set of pairs in $E$ 
+and $L$, respectively, with any hardcoded edges removed. In the example 
+of Section 2, $E$ represented by {\tt edges} contains 483 pairs, 
+and $L$ represented by {\tt referencePairs} contains 287 pairs.
+Both $E$ and $L$ include all 18 of the known hardcoded edges $K$ 
+represented by {\tt reg.known}.
+Hence $E \backslash K$ contains 465 pairs,
+and $L \backslash K$ contains 269 pairs.
+\item Let $U$ be the set of all directed 
+pairs $r$-$g$ such that $r$ is a regulator in
+$L \backslash K$ and $g$ is a target gene in $L \backslash K$.
+For the example of Section 2, $L \backslash K$ has 11 unique regulator
+genes and 99 unique target genes. So there are 11 $\times$ 99 or 1089
+pairs in $U$. Assume further that the linked pairs in $U$ are precisely
+those pairs in $L \backslash K$, 
+and that all other pairs are unlinked.
+\item Let $U \backslash K$ be the set of pairs in $U$ with any hardcoded eges
+removed (hardcoded edges may resurface in the unlinked pairs). 
+For the example of Section 2, 17 of the 18 pairs in $K$ occur in
+$U$, so there are 1089 - 17 = 1072 edges in $U \backslash K$.
+\end{itemize}
+The assessment is done using the contingency table of 
+$(E \backslash K) \cap (U \backslash K)$
+relative to $U \backslash K$. For the example of Section 2, the assessment 
+would be done with the 57 of the 465
+pairs in $E \backslash K$ that also belong to $U \backslash K$.
+
+A function called {\tt contabs.netBMA} is provided to produce contingency
+tables from a reference network according the procedure described above.
+Here we compare the edges produced in Section 2 by {\tt networkBMA} modeling 
+on the  yeast data with the reference network {\tt referencePairs} made up of
+results reported in the literature:
+<<contingency.tables>>=
+ctables <- contabs.netwBMA( edges, referencePairs, reg.known, 
+                              thresh=c(.5,.75,.9))
+ctables
+@
+Another function called `{\tt contabs}' is provided 
+for computing contingency tables when the true underlying network is known.
+The {\tt scores} function can be used to obtain common assessment statistics
+from the contingency tables, including sensitivity, specificity, precision,
+recall, and false discovery rate among other measures.
+<<scores>>=
+scores( ctables, what = c("FDR", "precision", "recall"))
+@
+Areas under the ROC and Precision-Recall curves covered by contingency
+tables can also be estimated using functions {\tt roc} and {\tt prc},
+with the option to plot the associated curves. 
+%Precision-Recall curves,
+%orginally developed in the context of information retrieval,
+%have been considered a better assessment measure than ROC curves when
+%there is considerable disparity in the sizes of the populations in question 
+%(Goadrich et~al. 2004, Kok and Domingos 2004, Singla and Domingos 2005).
+%Gene regulatory networks are sparse, so the number of gene pairs that are not
+%edges in the network is much greater than those that are.
+The following gives the ROC and Precision-Recall curvers 
+associated with 
+the default contingency tables, in which the
+threshholds are all values for posterior probabilities that
+appear in {\tt edges}.
+<<rocANDprc>>=
+roc( contabs.netwBMA( edges, referencePairs), plotit = TRUE)
+title("ROC")
+
+prc( contabs.netwBMA( edges, referencePairs), plotit = TRUE)
+title("Precision-Recall")
+@
+
+The resulting plots are shown in Figure \ref{fig:rocANDprc}.
+\begin{figure}
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[width=.45\textwidth]{roc.pdf}&&
+\includegraphics[width=.45\textwidth]{prc.pdf}
+\end{tabular}
+\end{center}
+\caption{ROC and Precision-Recall curve sectors for a {\tt networkBMA}
+         model of the yeast-rapamycin test data.
+         The black lines delineate the estimated curves.
+         The vertical red lines delineate the range of horizontal values
+         covered by the contingency tables.  The dotted black lines
+         are linear interpolants
+         outside this range. The diagonal blue line on the
+         ROC plot indicates the line betwween (0,0) and (1,1).
+}
+\label{fig:rocANDprc}
+\end{figure}
+The output components are as follows:
+\begin{itemize}
+\item {\tt area}: The estimated area under the curve for the horizontal
+      sector ranging from 0 to 1. This should be used with caution 
+      when the sector in which the data falls is small.
+\item {\tt sector}: The estimated area under the horizontal sector covered
+     by the contingency tables. 
+\item {\tt width}: The width of the horizontal sector covered by the
+      contingency tables.
+\end{itemize}
+
+\section{Linear Modeling for Static Gene Expression Data}
+
+{\tt networkBMA} relies on sparse linear modeling via iterative Bayesian model
+averaging (BMA).
+BMA addresses uncertainty in model selection, and builds a 
+weighted--average model from plausible models.
+The resulting model has better overall predictive ability than constituent
+       models, and tends to use few variables from among a larger set.
+BMA has been iteratively extended to data with more variables that observations
+(Yeung at~al. 2005, 2009, 2011).
+The {\tt networkBMA} package includes a function, {\tt iterateBMAlm},
+for linear modeling via iterative BMA. We illustrate its use on a
+static gene expression dataset (without any time points), 
+{\tt brem.data}, to infer the regulators of a particular gene by
+regressing it on the expression levels of the other genes.
+Function {\tt iterateBMAlm} can be applied to each gene so as to infer 
+all edges in the network. For one gene, the procedure is as follows:
+
+<<iterateBMAlm>>=
+gene <- "YNL037C"
+variables <- which(rownames(brem.data) != gene)
+
+control <- iBMAcontrolLM(OR = 50, nbest = 20, thresProbne0 = 5)
+
+iBMAmodel.YNL037C <- iterateBMAlm( x = t(brem.data[variables,]),
+                  y = unlist(brem.data[gene,]), control = control)
+@
+
+Function {\tt iBMAcontrolLM} facilitates input of BMA control parameters,
+including 
+{\tt nbest} for specifying the number of best models of each size to be
+initially retained,
+{\tt OR} for defining the width of  `Occam's window' for  model exclusion, 
+and {\tt  thresProbne0} for determining the cutoff for probability (in percent)
+of a variable being included in the modeling (Raftery et~al. 2005).
+See the R help documentation for {\tt iBMAcontrolLM} for a detailed
+description of these parameters, and Hoeting et~al. (1999) for a tutorial
+on the underlying BMA paradigm.
+The estimated posterior probabilities (in percent)
+for genes that regulate {\tt YBL103C} can be seen as follows:
+
+<<probne0>>=
+iBMAmodel.YNL037C$probne0[iBMAmodel.YNL037C$probne0 > 0]
+@
+
+\bibliographystyle{plain}
+\bibliography{networkBMA}
+
+\end{document}
+         For Precision-Recall,  the filled dots correspond to 
+         the distinct ({\tt recall}, {\tt precision}) pairs derived from
+         the contingency tables.

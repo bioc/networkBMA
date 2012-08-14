@@ -1,0 +1,68 @@
+citHeader("To cite package 'networkBMA' in publications use:")
+     
+     desc <- packageDescription("networkBMA")
+     year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
+     vers <- paste("R package version", desc$Version)
+     
+     citEntry(entry="misc",
+              title = "{\tt networkBMA}: Regression-bsed network inference using Bayesian Model Averaging",
+              author = personList(as.person("Chris Fraley"),
+                                  as.person("Ka Yee Yeung"),
+                                  as.person("Adrian E. Raftery")),
+              year = "2012",
+              paste("Fraley et al. (2012)",
+"{\tt networkBMA}: Regression-bsed network inference using Bayesian Model Averaging.",
+"software package (written in R) available through Bioconductor",
+"(2012)", sep=""))
+
+     citEntry(entry="misc",
+              title = "Uncovering gene regulatory relationships using {\tt networkBMA}",
+              author = personList(as.person("Ka Yee Yeung"),
+                                  as.person("Chris Fraley"),
+                                  as.person("Adrian E. Raftery")),
+              year = "2012",
+              paste("Yeung et al. (2012)",
+"Uncovering gene regulatory relationships using {\tt networkBMA}.",
+"vignette for Bioconductor package {\tt networkBMA}",
+"(2012)", sep=""))
+
+     citEntry(entry="article",
+              title = "Construction of regulatory networks using expression time-series data of a genotyped population",
+              author = personList(as.person("Ka Yee Yeung"),
+                                  as.person("Kenneth M. Dombek"),
+                                  as.person("Kenneth Lo"),
+                                  as.person("John E. Mittler"),
+                                  as.person("Jun Zhu"),
+                                  as.person("Eric E. Schadt"),
+                                  as.person("Roger E. Bumgarner"),
+                                  as.person("Adrian E. Raftery")),
+              year = "2011",
+              journal = "Proceedings of the National Academy of Sciences", 
+              volume = 108,
+              number = 48,
+              pages = "19436-19441",
+              textVersion =
+              paste("Yeung et al. (2011)",
+    "Construction of regulatory networks using expression time-series data of a genotyped population",
+            "Proceedings of the National Academy of Sciences", 
+             "108(48):19436-19441",  sep=""))
+
+     citEntry(entry="unpublished",
+              title =  "Integrating External Biological  Knowledge in the Construction of Regulatory Networks from 
+              Time-series  Expression Data",
+              author = personList(as.person("Kenneth Lo"),
+                                  as.person("Adrian E. Raftery"),
+                                  as.person("Kenneth M. Dombek"),
+                                  as.person("Jun Zhu"),
+                                  as.person("Eric E. Schadt"),
+                                  as.person("Roger E. Bumgarner"),
+                                  as.person("Ka Yee Yeung")),
+              year = "2011",
+              note = "unpublished manuscript",
+              institution = "University of Washington",
+              textVersion =
+              paste("Lo et al. (2011)",
+             "Integrating External Biological  Knowledge in the Construction of Regulatory Networks from 
+              Time-series  Expression Data",
+            "unpublished manuscript", 
+             "University of Washington",  sep=""))

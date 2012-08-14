@@ -1,0 +1,50 @@
+C. Fraley, K. Y. Yeung, A. E. Raftery, 
+networkBMA: Regression-based network inference using Bayesian Model Averaging,
+R software package available through Bioconductor (2012).
+
+K. Y. Yeung, C. Fraley, A. E. Raftery, 
+Uncovering gene regualtory realtionships using networkBMA,
+vignette for Bioconductor packge networkBMA (2012).
+
+K. Lo, A. E. Raftery, K. M. Dombek, J. Zhu, E. E. Schadt, R. E. Bumgarner and K. Y. Yeung,
+Integrating External Biological  Knowledge in the Construction of Regulatory Networks from Time-series  Expression Data, 
+unpublished manuscript, University of Washington (2011)
+
+ K. Y. Yeung, K. M. Dombek, K. Lo, J. E. Mittler, J. Zhu, E. E. Schadt, R. E. Bumgarner and A. E. Raftery, 
+Construction of   regulatory  networks  using expression time-series data of a genotyped  population, 
+Proceedings of the National Academy of Sciences,   108(48):19436-41 (2011).
+
+@article{Yeung&2011,
+      author = "K. Y. Yeung and K. M. Dombek and K. Lo and J. E. Mittler and
+                J. Zhu and E. E. Schadt and R. E. Bumgarner and A. E. Raftery",
+           title = "Construction of regulatory networks using expression
+                    time-series data of a genotyped population",
+            journal = "Proceedings of the National Academy of Sciences",
+            volume = 108,
+            number = 48,
+            pages = "19436-19441",
+            month = "November",
+            day = "29",
+            year = 2011}
+
+@unpublished{Lo&2011,
+      author = "K. Lo and A. E. Raftery and K. M. Dombek and
+                J. Zhu and E. E. Schadt and R. E. Bumgarner
+                and K. Y. Yeung",
+           title = "Integrating External Biological Knowledge in the
+Construction of Regulatory Networks from Time-series Expression Data",
+           institution = "University of Washington",
+           type = "unpublished manuscript",
+            year = 2011}
+
+@misc{networkBMApackage,
+      author = "C. Fraley and K. Y. Yeung and A. E. Raftery",
+      title = "{networkBMA}: {Regression-based} network inference using {BMA}",
+      note = "{R} package distributed through {Bioconductor}",
+      year = 2012}
+
+@misc{networkBMAvignette,
+      author = "C. Fraley and K. Y. Yeung and A. E. Raftery",
+  title = "Uncovering gene regualtory realtionships using networkBMA",
+  note = "vignette for Bioconductor packge networkBMA",
+      year = 2012}
