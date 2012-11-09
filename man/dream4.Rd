@@ -63,13 +63,27 @@
 }
 
 \section{References}{
-  G. Stolovitzky, D. Monroe and A. Califano (2007),
+  Stolovitzky G, Monroe D and Califano A. (2007),
   Dialogue on Reverse-Engineering Assessment and Methods.
   Annals of the New York Academy of Sciences,1115(1),1--22.
 
-  G. Stolovitzky, A. Califano, R. Prill and J. Saez Rodriguez (2009),
+  Stolovitzky G, Califano A, Prill RJ and Saez Rodriguez J.(2009),
   DREAM: Dialogue for Reverse Engineering Assessments and Methods,
   http://wiki.c2b2.columbia.edu/dream/
+
+  Marbach D, Prill RJ, Schaffter T, Mattiussi C, Floreano D, and
+  Stolovitzky G. Revealing strengths and weaknesses of methods for gene
+  network inference. PNAS, 107(14):6286-6291, 2010.
+
+  Marbach D, Schaffter T, Mattiussi C, and Floreano D. Generating
+  Realistic in silico Gene Networks for Performance Assessment of
+  Reverse Engineering Methods. Journal of Computational Biology, 16(2)
+  pp. 229-239, 2009.
+
+  Prill RJ, Marbach D, Saez-Rodriguez J, Sorger PK, Alexopoulos LG, Xue
+  X, Clarke ND, Altan-Bonnet G, and Stolovitzky G. Towards a rigorous
+  assessment of systems biology models: the DREAM3 challenges. PLoS ONE,
+  5(2):e9202, 2010.
 }
 
 \seealso{\code{networkBMA}}

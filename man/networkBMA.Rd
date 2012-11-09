@@ -98,9 +98,9 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
 }
 \section{References}{
   K. Lo, A. E. Raftery, K. M. Dombek, J. Zhu, E. E. Schadt, R. E. Bumgarner 
-  and K. Y. Yeung (2011), Integrating External Biological 
+  and K. Y. Yeung (2012), Integrating External Biological 
   Knowledge in the Construction of Regulatory Networks from Time-series 
-  Expression Data, unpublished manuscript, University of Washington.
+  Expression Data, BMC Systems Biology, 6:101.
 
   K. Y. Yeung, K. M. Dombek, K. Lo, J. E. Mittler, J. Zhu, E. E. Schadt,
   R. E. Bumgarner and A. E. Raftery (2011), Construction of 
