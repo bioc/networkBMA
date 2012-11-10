@@ -33,7 +33,7 @@
 
 %Goadrich&2004,KokDomingos2005,SinglaDomingos2005,
 
-\nocite{Brem&2002,BremKruglyak2005,Yeung&2005,Yeung&2011,Lo&2011,YEASTRACT,Hoeting&1999,BMApackage,iterativeBMApackage,networkBMApackage,SCPD,YPD,ArrayExpress}
+\nocite{Brem&2002,BremKruglyak2005,Yeung&2005,Yeung&2011,Lo&2012,YEASTRACT,Hoeting&1999,BMApackage,iterativeBMApackage,networkBMApackage,SCPD,YPD,ArrayExpress}
 
 \begin{center}
 {\bf Uncovering gene regulatory relationships using {\tt networkBMA}}\\[5pt]
@@ -86,7 +86,7 @@ A 100 by 100 matrix, giving probability estimates for regulatory
 relationships in which the $(i,j)$ entry 
 gives the estimated probability that gene $i$ regulates gene $j$.
 These were computed using the supervised framework integrating multiple 
-data sources of Lo et~al. (2011).
+data sources of Lo et~al. (2012).
 \item[] {\tt referencePairs}:
  A 2-column data frame giving 287 regulator-gene pairs 
 among the selected set of 100 genes reported from the literature.
@@ -130,7 +130,7 @@ linear predictor in the model for gene $g$ is taken as the probability that
 gene $h$ regulates gene $g$ in the network.
 
 There are options for including known regulatory relationships 
-and prior priobabilities in the modeling (see Lo et~al. 2011), 
+and prior priobabilities in the modeling (see Lo et~al. 2012), 
 as well as for ordering the variables,
 and for specifying 
 the number of ordered variables to be included in the modeling.
