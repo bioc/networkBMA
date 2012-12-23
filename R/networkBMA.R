@@ -151,6 +151,7 @@ for (i in vars) {
 }
 
  result <- list2df(edgeList)
+ result <- result[order(result[,3],decreasing=TRUE),]
  class(result) <- c("networkBMA","data.frame")
  result
 }

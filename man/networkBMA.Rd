@@ -80,7 +80,8 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
   directed edge for which the probability is estimated to be nonzero. The 
   first column gives the name of the regulator, the second column gives the
   name of the regulated gene, and the third column gives the estimated
-  probability for the regulator-gene pair. \cr
+  probability for the regulator-gene pair. Rows are ordered by
+  decreasing probability estimate. \cr
   The  \code{summary} function gives the number of inferred edges at 
   posterior probabilities 0, .5, .75, .90, .95 and 1.0
 }
