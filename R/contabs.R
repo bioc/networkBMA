@@ -1,5 +1,5 @@
 contabs <-
-function (network, reference, size, threshholds = NULL) 
+function (network, reference, size, thresholds = NULL) 
 {
 
     geneNames <- function(df2) {
@@ -86,27 +86,27 @@ function (network, reference, size, threshholds = NULL)
 
    reference <- pasteEdges( reference, index)
 
-   if (is.null(threshholds)) {
-#      threshholds <- sort(unique(prob))
-     threshholds <- sort(as.numeric(names(table(prob))))
+   if (is.null(thresholds)) {
+#      thresholds <- sort(unique(prob))
+     thresholds <- sort(as.numeric(names(table(prob))))
    }
 
-   if (any(threshholds > 1)) stop("threshholds: use probabilities rather than percentages")
+   if (any(thresholds > 1)) stop("thresholds: use probabilities rather than percentages")
 
-   threshholds <- sort(threshholds)
+   thresholds <- sort(thresholds)
 
-   TP <- FN <- FP <- TN <- rep(NA, length(threshholds))
+   TP <- FN <- FP <- TN <- rep(NA, length(thresholds))
 
-#  labls <- as.character( sapply( as.character(threshholds), 
+#  labls <- as.character( sapply( as.character(thresholds), 
 #                           function(x) substring( x, 1, min(nchar(x),8))))
 
-   labls <- as.character(threshholds)
+   labls <- as.character(thresholds)
    names(TP) <- names(FN) <- names(FP) <- names(TN) <- labls
 
    nMissing <- size - length(reference)
-   for (i in seq(along = threshholds))
+   for (i in seq(along = thresholds))
       {
-        thresh <- threshholds[i]
+        thresh <- thresholds[i]
         index <- labls[i]
         if (thresh != 0) {
           edges <- network[prob >= thresh]

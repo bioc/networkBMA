@@ -5,17 +5,17 @@
 }
 \description{
    Counts the number of edges in a \code{networkBMA}  object that are
-   at or above specified probability threshholds.
+   at or above specified probability thresholds.
 }
 \usage{
-\method{summary}{networkBMA}(object, threshholds = c(0,.5,.75,.90,.95,1), \dots)
+\method{summary}{networkBMA}(object, thresholds = c(0,.5,.75,.90,.95,1), \dots)
 }
 \arguments{
   \item{object}{
     A \code{networkBMA} object.
   }
-  \item{threshholds}{
-    Threshhold probabilities. The number of edges at or above these values
+  \item{thresholds}{
+    Threshold probabilities. The number of edges at or above these values
      are included in the output.
    }
  \item{\dots}{
@@ -24,7 +24,7 @@
 }
 \value{
   A vector giving the number of edges in the \code{object} that have
-  probability at or above the values given in \code{threshholds}.
+  probability at or above the values given in \code{thresholds}.
 }
 \seealso{
 \code{\link{networkBMA}}

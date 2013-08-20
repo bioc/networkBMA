@@ -210,7 +210,7 @@ with the option to plot the associated curves.
 The following gives the ROC and Precision-Recall curvers 
 associated with 
 the default contingency tables, in which the
-threshholds are all values for posterior probabilities that
+thresholds are all values for posterior probabilities that
 appear in {\tt edges}.
 <<rocANDprc>>=
 roc( contabs.netwBMA( edges, referencePairs), plotit = TRUE)

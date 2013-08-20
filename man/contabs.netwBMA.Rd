@@ -9,7 +9,7 @@
    knowledge.
 }
 \usage{
-contabs.netwBMA(network, reference, known = NULL, threshholds = NULL)
+contabs.netwBMA(network, reference, known = NULL, thresholds = NULL)
 }
 \arguments{
   \item{network}{
@@ -36,11 +36,11 @@ contabs.netwBMA(network, reference, known = NULL, threshholds = NULL)
     \code{network} (this is checked), and they may also have regulator-gene 
     pairs in common with \code{reference}.
   }
-  \item{threshholds}{
-    Threshhold values on the probability of edges being in the network for 
+  \item{thresholds}{
+    Threshold values on the probability of edges being in the network for 
     which contingency tables are desired. The default is all distinct nonzero 
-    probabilities in the network. Nonzero threshholds are treated as 
-    inclusive. Threshholds should be specified as probabilities rather
+    probabilities in the network. Nonzero thresholds are treated as 
+    inclusive. Thresholds should be specified as probabilities rather
     than percentages.
   }
 }

@@ -87,7 +87,7 @@ edges <- networkBMA(data = timeSeries[,-(1:2)],
 prelim <- contabs.prelim( network = edges, reference = referenceNetwork, 
                        known = reg.known)
 contabs( network = prelim$network, reference = prelim$reference,
-         size = prelim$size, threshholds = prelim$threshholds)
+         size = prelim$size, thresholds = prelim$thresholds)
 
 contabs.netwBMA( network = edges, reference = referenceNetwork, 
                  known = reg.known)

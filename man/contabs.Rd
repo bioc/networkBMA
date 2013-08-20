@@ -7,11 +7,11 @@
 }
 \description{
    Contingency table values relative to known truth 
-   for probabilistic networks given threshholds
+   for probabilistic networks given thresholds
    on edge probabilies.
 }
 \usage{
-contabs(network, reference, size, threshholds = NULL) 
+contabs(network, reference, size, thresholds = NULL) 
 }
 \arguments{
   \item{network}{
@@ -31,17 +31,17 @@ contabs(network, reference, size, threshholds = NULL)
   \item{size}{
      The size of the network if all possible edges were included.
   }
-  \item{threshholds}{
-    Threshhold values on the probability of edges being in the network for 
+  \item{thresholds}{
+    Threshold values on the probability of edges being in the network for 
     which contingency tables are desired. The default is all distinct nonzero 
     probabilities in the network. 
-    Threshholds should be specified as probabilities rather
+    Thresholds should be specified as probabilities rather
     than percentages.
   }
 }
 \value{
    Outputs a data frame giving the contingency table values for the 
-   specified threshholds, with row names being the threshhold values.
+   specified thresholds, with row names being the threshold values.
    The variables (columns) are of the data frame  are as follows:  
    \item{TP}{
     true positives, or regulator-gene pairs 

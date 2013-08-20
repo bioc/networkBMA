@@ -1,16 +1,16 @@
 contabs.netwBMA <-
-function (network, reference, known=NULL, threshholds = NULL)
+function (network, reference, known=NULL, thresholds = NULL)
 {
 
    prelim <- contabs.prelim( network, reference, known)
 
-   if (is.null(threshholds)) {
+   if (is.null(thresholds)) {
      prob <- prelim$network[,3]
-#    threshholds <- sort(unique(prob))
-     threshholds <- sort(as.numeric(names(table(prob))))
+#    thresholds <- sort(unique(prob))
+     thresholds <- sort(as.numeric(names(table(prob))))
    }
 
-   if (any(threshholds > 1)) stop("threshholds: use probabilities rather than percentages")
+   if (any(thresholds > 1)) stop("thresholds: use probabilities rather than percentages")
 
    contabs( network = prelim$network, reference = prelim$reference, 
             size = prelim$size)
