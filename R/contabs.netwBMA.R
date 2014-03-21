@@ -13,5 +13,5 @@ function (network, reference, known=NULL, thresholds = NULL)
    if (any(thresholds > 1)) stop("thresholds: use probabilities rather than percentages")
 
    contabs( network = prelim$network, reference = prelim$reference, 
-            size = prelim$size)
+            size = prelim$size, thresholds = thresholds)
 }

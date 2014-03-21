@@ -5,29 +5,35 @@ citHeader("To cite package 'networkBMA' in publications use:")
      vers <- paste("R package version", desc$Version)
      
      citEntry(entry="misc",
-              title = "{\tt networkBMA}: Regression-bsed network inference using Bayesian Model Averaging",
+ title = "{\tt networkBMA}: Regression-bsed network inference using 
+                          Bayesian Model Averaging",
               author = personList(as.person("Chris Fraley"),
+				  as.person("Wm. Chad Young"),
                                   as.person("Ka Yee Yeung"),
                                   as.person("Adrian E. Raftery")),
-              year = "2012",
-              paste("Fraley et al. (2012)",
-"{\tt networkBMA}: Regression-bsed network inference using Bayesian Model Averaging.",
-"software package (written in R) available through Bioconductor",
+              year = "2014",
+              paste("Fraley et al. (2014)",
+"{\tt networkBMA}: Regression-bsed network inference using 
+  Bayesian Model Averaging.",
+"software package (written in R) available through Bioconductor; 
+revised in 2014",
 "(2012)", sep=""))
 
      citEntry(entry="misc",
-              title = "Uncovering gene regulatory relationships using {\tt networkBMA}",
+   title = "Uncovering gene regulatory relationships using {\tt networkBMA}",
               author = personList(as.person("Ka Yee Yeung"),
                                   as.person("Chris Fraley"),
-                                  as.person("Adrian E. Raftery")),
+                                  as.person("Adrian E. Raftery"),
+				  as.person("Wm. Chad Young")),
               year = "2012",
               paste("Yeung et al. (2012)",
 "Uncovering gene regulatory relationships using {\tt networkBMA}.",
-"vignette for Bioconductor package {\tt networkBMA}",
+"vignette for Bioconductor package {\tt networkBMA}; revised in 2014",
 "(2012)", sep=""))
 
      citEntry(entry="article",
-              title = "Construction of regulatory networks using expression time-series data of a genotyped population",
+              title = "Construction of regulatory networks using expression 
+time-series data of a genotyped population",
               author = personList(as.person("Ka Yee Yeung"),
                                   as.person("Kenneth M. Dombek"),
                                   as.person("Kenneth Lo"),
@@ -43,12 +49,14 @@ citHeader("To cite package 'networkBMA' in publications use:")
               pages = "19436-19441",
               textVersion =
               paste("Yeung et al. (2011)",
-    "Construction of regulatory networks using expression time-series data of a genotyped population",
+    "Construction of regulatory networks using expression time-series data of
+a genotyped population",
             "Proceedings of the National Academy of Sciences", 
              "108(48):19436-19441",  sep=""))
 
-     citEntry(entry="unpublished",
-              title =  "Integrating External Biological  Knowledge in the Construction of Regulatory Networks from 
+     citEntry(entry="article",
+              title =  "Integrating External Biological  Knowledge in the 
+                        Construction of Regulatory Networks from 
               Time-series  Expression Data",
               author = personList(as.person("Kenneth Lo"),
                                   as.person("Adrian E. Raftery"),
@@ -57,12 +65,13 @@ citHeader("To cite package 'networkBMA' in publications use:")
                                   as.person("Eric E. Schadt"),
                                   as.person("Roger E. Bumgarner"),
                                   as.person("Ka Yee Yeung")),
-              year = "2011",
-              note = "unpublished manuscript",
-              institution = "University of Washington",
+              year = "2012",
+   	      journal = "BMC Systems Biology",
+              volume = 6,
+		pages = 101,
               textVersion =
-              paste("Lo et al. (2011)",
-             "Integrating External Biological  Knowledge in the Construction of Regulatory Networks from 
-              Time-series  Expression Data",
-            "unpublished manuscript", 
-             "University of Washington",  sep=""))
+              paste("Lo et al. (2012)",
+             "Integrating External Biological  Knowledge in the Construction 
+              of Regulatory Networks from Time-series Expression Data",
+		"BMC Systems Biology",
+             "6:101",  sep=""))

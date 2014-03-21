@@ -18,6 +18,7 @@
 \setlength{\leftmarginiv}{1.5em}
 
 \usepackage{epsfig,subfigure,lscape}
+\usepackage[lined,ruled]{algorithm2e}
 
 \renewcommand\theequation{\thesection.\arabic{equation}}
 
@@ -33,12 +34,13 @@
 
 %Goadrich&2004,KokDomingos2005,SinglaDomingos2005,
 
-\nocite{Brem&2002,BremKruglyak2005,Yeung&2005,Yeung&2011,Lo&2012,YEASTRACT,Hoeting&1999,BMApackage,iterativeBMApackage,networkBMApackage,SCPD,YPD,ArrayExpress}
+\nocite{Brem&2002,BremKruglyak2005,Yeung&2005,Yeung&2011,Lo&2011,YEASTRACT,Hoeting&1999,BMApackage,iterativeBMApackage,networkBMApackage,SCPD,YPD,ArrayExpress}
 
 \begin{center}
-{\bf Uncovering gene regulatory relationships using {\tt networkBMA}}\\[5pt]
-Ka Yee Yeung, Chris Fraley, Adrian E. Raftery\\
-Departments of Microbiology (KYY) and Statistics (CF and AER)\\
+{\bf Uncovering gene regulatory relationships from time-series
+  expression data using {\tt networkBMA}}\\[5pt]
+Ka Yee Yeung, Chris Fraley, Adrian E. Raftery, Wm. Chad Young\\
+Departments of Microbiology (KYY) and Statistics (CF, AER, and WCY)\\
 University of Washington
 \end{center}
 
@@ -86,7 +88,7 @@ A 100 by 100 matrix, giving probability estimates for regulatory
 relationships in which the $(i,j)$ entry 
 gives the estimated probability that gene $i$ regulates gene $j$.
 These were computed using the supervised framework integrating multiple 
-data sources of Lo et~al. (2012).
+data sources of Lo et~al. (2011).
 \item[] {\tt referencePairs}:
  A 2-column data frame giving 287 regulator-gene pairs 
 among the selected set of 100 genes reported from the literature.
@@ -113,15 +115,27 @@ reg.known
 \section{Network Modeling}
 Given the yeast expression data from the Rapamycin experiments, the
 {\tt networkBMA} function can be invoked to estimate the probabilities
-of regulatory relationships using iterative Bayesian Model Averaging 
-(Yeung et~al. 2005, 2011):
-<<networkBMA>>=
-edges <- networkBMA(data = timeSeries[,-(1:2)], 
+of regulatory relationships using either ScanBMA (the default
+''algorithm'') or iterative Bayesian Model Averaging (Yeung
+et~al. 2005, 2011) (by setting the parameter ''algorithm=iBMA''). The
+ScanBMA algorithm, as shown in Algorithm 1, is preferred when
+available. The parameter ''prior.prob'' indicates the prior
+probabilities of regulatory relationships.  If the parameter
+''prior.prob'' is set to a single positive fraction, it represents the
+probability of a regulator-gene pair in the network ({\em i.e.} the
+expected network density as defined in (Lo et~al. 2011)).  The
+parameter ''prior.prob'' can also be set to a matrix in which the
+(i,j) entry is the estimated prior probability that gene i regulates
+gene j.  The default value of ''prior.prob'' is NULL, which implies
+that no prior information will be used in modeling the network.
+<<yeastScanBMA>>=
+edges.ScanBMA <- networkBMA(data = timeSeries[,-(1:2)], 
                     nTimePoints = length(unique(timeSeries$time)), 
-                    prior.prob = reg.prob, known = reg.known, 
-                    nvar = 50, ordering = "bic1+prior")
-edges[1:9,]
-@
+                    prior.prob = reg.prob,
+                    nvar = 50,
+                    ordering = "bic1+prior", diff100 = TRUE, diff0 = TRUE)
+edges.ScanBMA[1:9,]
+@ 
 For each gene $g$, the observed gene expression of genes at time $t-1$ serve 
 as linear predictors for modeling the observed expression of gene $g$ at time 
 $t$. BMA modeling results in a weighted average of models consisting of 
@@ -129,11 +143,52 @@ relatively small numbers of predictors. The probability of gene $h$ being a
 linear predictor in the model for gene $g$ is taken as the probability that 
 gene $h$ regulates gene $g$ in the network.
 
-There are options for including known regulatory relationships 
-and prior priobabilities in the modeling (see Lo et~al. 2012), 
-as well as for ordering the variables,
-and for specifying 
-the number of ordered variables to be included in the modeling.
+%% KY edits
+There are options for ordering the variables (parameter ''ordering") and
+specifying the number of ordered variables (parameter ''nvar") to be included in the
+modeling.  In both algorithms ScanBMA and iBMA, all the candidate
+variables (genes) are initially ranked using the method specified in
+''ordering", and the top ''nvar" such variables will be used as input
+in the BMA regression step.  Note that if ''algorithm" is set to ''ScanBMA", the
+parameter ''ordering" will have no effect in the BMA regression step.
+
+Differentiation can also be performed on edges returned with
+0\% or 100\% posterior probability. To include known regulatory
+relationships, the iBMA algorithm must be used. This can be done as
+shown below, but the results shown subsequently will use the call with
+ScanBMA as the algorithm, as above.
+
+<<yeastiBMA>>=
+edges.iBMA <- networkBMA(data = timeSeries[,-(1:2)], 
+                          nTimePoints = length(unique(timeSeries$time)), 
+                          prior.prob = reg.prob, known = reg.known,
+                          algorithm = "iBMA", nvar = 50,
+                          control = iBMAcontrolLM(),
+                          ordering = "bic1+prior", diff100 = FALSE,
+                          diff0 = FALSE)
+edges.iBMA[1:9,]
+@
+
+\begin{algorithm}
+  \DontPrintSemicolon
+  Initialize $\mathcal{M}_{keep}, \mathcal{M}_{next} = \{\}$\;
+  Initialize $\mathcal{M}_{active} = \{null~model\}$, $bestScore$ = 0\;
+  \While{$\mathcal{M}_{active}$ not empty} {
+    \For{model $m_{new}$ in \textnormal{NeighborsOf}($\mathcal{M}_{active}$)} {
+      $mScore$ = EvaluateModelScore($m_{new}$)\;
+      \If{$mScore$ in \textnormal{OccamsWindow}($bestScore$)} {
+        add $m_{new}$ to $\mathcal{M}_{next}$\;
+        $bestScore$ = \textnormal{BestModelScore}($bestScore$, $mScore$)\;
+      }
+    }
+    Trim models from $\mathcal{M}_{keep}$ according to $bestScore$\;
+    Add good models from $\mathcal{M}_{active}$ to
+    $\mathcal{M}_{keep}$\;
+    $\mathcal{M}_{active} =$ good models from $\mathcal{M}_{next}$\;
+  }
+  return $\mathcal{M}_{keep}$\;
+  \caption{ScanBMA}
+\end{algorithm}
 
 \section{Assessment of Network Models}
 
@@ -145,7 +200,7 @@ The comparison is done as follows:
 \item Let $E$ be the set of  regulator-target
 gene edges resulting from {\tt networkBMA}, possibly reduced using a
 probability  threshold. In the context of the example in Section 2, 
-$E$ corresponds to the set of edges represented in the object {\tt edges}.
+$E$ corresponds to the set of edges represented in the object {\tt edges.ScanBMA}.
 \item Let $K$ be the set of known regulator-target gene
 edges hardcoded in the modeling. 
 In the example in Section 2, $K$ corresponds to {\tt reg.known}.
@@ -154,7 +209,7 @@ literature. In the example in Section 2, $L$ corresponds to
 {\tt referencePairs}.
 \item Let $E \backslash K$ and $L \backslash K$ be the set of pairs in $E$ 
 and $L$, respectively, with any hardcoded edges removed. In the example 
-of Section 2, $E$ represented by {\tt edges} contains 483 pairs, 
+of Section 2, $E$ represented by {\tt edges.ScanBMA} contains 483 pairs, 
 and $L$ represented by {\tt referencePairs} contains 287 pairs.
 Both $E$ and $L$ include all 18 of the known hardcoded edges $K$ 
 represented by {\tt reg.known}.
@@ -185,7 +240,7 @@ Here we compare the edges produced in Section 2 by {\tt networkBMA} modeling
 on the  yeast data with the reference network {\tt referencePairs} made up of
 results reported in the literature:
 <<contingency.tables>>=
-ctables <- contabs.netwBMA( edges, referencePairs, reg.known, 
+ctables <- contabs.netwBMA( edges.ScanBMA, referencePairs, reg.known, 
                               thresh=c(.5,.75,.9))
 ctables
 @
@@ -210,13 +265,13 @@ with the option to plot the associated curves.
 The following gives the ROC and Precision-Recall curvers 
 associated with 
 the default contingency tables, in which the
-thresholds are all values for posterior probabilities that
-appear in {\tt edges}.
+threshholds are all values for posterior probabilities that
+appear in {\tt edges.ScanBMA}.
 <<rocANDprc>>=
-roc( contabs.netwBMA( edges, referencePairs), plotit = TRUE)
+roc( contabs.netwBMA( edges.ScanBMA, referencePairs), plotit = TRUE)
 title("ROC")
 
-prc( contabs.netwBMA( edges, referencePairs), plotit = TRUE)
+prc( contabs.netwBMA( edges.ScanBMA, referencePairs), plotit = TRUE)
 title("Precision-Recall")
 @
 
@@ -224,8 +279,8 @@ The resulting plots are shown in Figure \ref{fig:rocANDprc}.
 \begin{figure}
 \begin{center}
 \begin{tabular}{ccc}
-\includegraphics[width=.45\textwidth]{roc.pdf}&&
-\includegraphics[width=.45\textwidth]{prc.pdf}
+\includegraphics[width=.45\textwidth]{roc-update.pdf}&&
+\includegraphics[width=.45\textwidth]{prc-update.pdf}
 \end{tabular}
 \end{center}
 \caption{ROC and Precision-Recall curve sectors for a {\tt networkBMA}
@@ -252,48 +307,57 @@ The output components are as follows:
 
 \section{Linear Modeling for Static Gene Expression Data}
 
-{\tt networkBMA} relies on sparse linear modeling via iterative Bayesian model
-averaging (BMA).
-BMA addresses uncertainty in model selection, and builds a 
-weighted--average model from plausible models.
-The resulting model has better overall predictive ability than constituent
-       models, and tends to use few variables from among a larger set.
-BMA has been iteratively extended to data with more variables that observations
-(Yeung at~al. 2005, 2009, 2011).
-The {\tt networkBMA} package includes a function, {\tt iterateBMAlm},
-for linear modeling via iterative BMA. We illustrate its use on a
-static gene expression dataset (without any time points), 
-{\tt brem.data}, to infer the regulators of a particular gene by
-regressing it on the expression levels of the other genes.
-Function {\tt iterateBMAlm} can be applied to each gene so as to infer 
-all edges in the network. For one gene, the procedure is as follows:
+{\tt networkBMA} relies on sparse linear modeling via iterative
+Bayesian model averaging (BMA).  BMA addresses uncertainty in model
+selection, and builds a weighted--average model from plausible models.
+The resulting model has better overall predictive ability than
+constituent models, and tends to use few variables from among a larger
+set.  BMA has been iteratively extended to data with more variables
+that observations (Yeung at~al. 2005, 2009, 2011).  The {\tt
+  networkBMA} package functions, {\tt ScanBMA} and {\tt iterateBMAlm},
+for linear modeling via iterative BMA. We illustrate their use on a
+static gene expression dataset (without any time points), {\tt
+  brem.data}, to infer the regulators of a particular gene by
+regressing it on the expression levels of the other genes.  Functions
+{\tt ScanBMA} and {\tt iterateBMAlm} can be applied to each gene so as
+to infer all edges in the network. For one gene, the procedure is as
+follows:
 
-<<iterateBMAlm>>=
+<<ScanBMA>>=
 gene <- "YNL037C"
 variables <- which(rownames(brem.data) != gene)
 
-control <- iBMAcontrolLM(OR = 50, nbest = 20, thresProbne0 = 5)
+control <- ScanBMAcontrol(OR = 20, useg = TRUE,
+                          gCtrl = gControl(optimize = FALSE, g0 = 20))
 
-iBMAmodel.YNL037C <- iterateBMAlm( x = t(brem.data[variables,]),
+ScanBMAmodel.YNL037C <- ScanBMA( x = t(brem.data[variables,]),
                   y = unlist(brem.data[gene,]), control = control)
 @
 
-Function {\tt iBMAcontrolLM} facilitates input of BMA control parameters,
-including 
-{\tt nbest} for specifying the number of best models of each size to be
-initially retained,
-{\tt OR} for defining the width of  `Occam's window' for  model exclusion, 
-and {\tt  thresProbne0} for determining the cutoff for probability (in percent)
-of a variable being included in the modeling (Raftery et~al. 2005).
-See the R help documentation for {\tt iBMAcontrolLM} for a detailed
-description of these parameters, and Hoeting et~al. (1999) for a tutorial
-on the underlying BMA paradigm.
-The estimated posterior probabilities (in percent)
-for genes that regulate {\tt YBL103C} can be seen as follows:
+Function {\tt ScanBMAcontrol} facilitates input of BMA control
+parameters, including {\tt useg} for indicating whether to use
+Zellner's \textit{g}-prior or BIC for model likelihood approximation
+and {\tt OR} for defining the width of `Occam's window' for model
+exclusion. {\tt gCtrl} allows specification of parameters related to
+the use of Zellner's \textit{g}-prior, including whether to use a
+static \textit{g} or optimize \textit{g} using an EM algorithm.  See
+the R help documentation for {\tt ScanBMAcontrol} and {\tt gControl}
+for detailed description of these parameters, and Hoeting
+et~al. (1999) for a tutorial on the underlying BMA paradigm.  The
+estimated posterior probabilities (in percent) for genes that regulate
+{\tt YBL103C} can be seen as follows:
 
 <<probne0>>=
-iBMAmodel.YNL037C$probne0[iBMAmodel.YNL037C$probne0 > 0]
+ScanBMAmodel.YNL037C$probne0[ScanBMAmodel.YNL037C$probne0 > 0]
 @
+
+\section{Acknowledgements}
+We would like to thank Dr. Roger Bumgarner for helpful discussion.
+
+{\it Funding}: AER, KYY and WCY are supported by NIH grant 5R01GM084163. KYY
+is also supported by 3R01GM084163-05S1. AER is also supported by NIH
+grants R01 HD054511 and R01 HD070936, and by Science Foundation
+Ireland ETS Walton visitor award 11/W.1/I207.
 
 \bibliographystyle{plain}
 \bibliography{networkBMA}

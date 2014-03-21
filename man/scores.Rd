@@ -111,7 +111,8 @@ reference <- reference[reference[,3] == 1,1:2]
 nTimePoints <- length(unique(dream4ts10[[network]]$time))
 
 edges1ts10 <- networkBMA( data = dream4ts10[[network]][,-(1:2)], 
-                          nTimePoints = nTimePoints, prior.prob = 0.1)
+                          nTimePoints = nTimePoints, prior.prob = 0.1,
+                          self = FALSE)
 
 size <- nPossibleEdges - nGenes
 

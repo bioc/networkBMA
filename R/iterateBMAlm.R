@@ -3,7 +3,7 @@ function(x, y, prior.prob = NULL, control = iBMAcontrolLM(), verbose = FALSE) {
 
     # Get the top "maxNvar" variables (replaces call to iterateBMAinit)
 
-    if (!exists("leaps")) library(BMA)
+    ## if (!exists("leaps")) library(BMA)
 
     maxNvar <- min(control$maxNvar, ncol(x))
  

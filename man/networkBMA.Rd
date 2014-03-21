@@ -5,12 +5,14 @@
 }
 \description{
   Estimates a probabilistic network of regulator-gene pairs   
-  from time series data via iterative BMA.
+  from time series data via ScanBMA or iterative BMA.
 }
 \usage{
 networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL, 
            ordering = "bic1+prior", nvar = NULL, self = TRUE, 
-           maxreg = NULL, control = iBMAcontrolLM(thresProbne0 = 5), 
+           maxreg = NULL, algorithm = "ScanBMA",
+           control = ScanBMAcontrol(),
+           diff0 = TRUE, diff100 = TRUE,
            verbose = FALSE) 
 }
 \arguments{
@@ -64,11 +66,31 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
      gene in the network. If provided, this is used to help reduce the 
      amount of memory used for the computations.
   }
+   \item{algorithm}{
+     A character string indicating which version of BMA to use. ScanBMA
+     is the default option and is recommended, but \code{"iBMA"} can be used
+     for iterative BMA. If \code{known} is not NULL, then \code{"iBMA"}
+     must be used.
+   }  
   \item{control}{
-     A list of control variables affecting the iterative BMA computations.
-     A function called \code{iBMAcontrolLM} is provided to faciltate this
-     setting, and the default is \code{iBMAcontrolLM(thresProbne0 = 5)}.
+     A list of control variables affecting the BMA computations.
+     The functions \code{ScanBMAcontrol} for \code{optimize="ScanBMA"}
+     and \code{iBMAcontrolLM} for \code{optimize="iBMA"} are provided to
+     faciltate this setting, and the default is
+     \code{ScanBMAcontrol()}. 
    }
+   \item{diff0}{
+     A logical variable indicating whether to differentiate between
+     edges with posterior probability of 0. This includes regulators not
+     included from when \code{nvar} is less than the total number of
+     possible regulators. If \code{known} is not NULL, then \code{diff0}
+     must be FALSE.
+     }
+   \item{diff100}{
+     A logical variable indicating whether to differentiate between
+     edges with posterior probability of 1.0. If \code{known} is not
+     NULL, then \code{diff100} must be FALSE.
+     }
   \item{verbose}{
      A logical variable indicating whether or not a detailed information 
      should be output as the computation progresses. The default value is
@@ -116,6 +138,7 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
 \seealso{
 \code{\link{summary.networkBMA}},
 \code{\link{varord}},
+\code{\link{ScanBMAcontrol}},
 \code{\link{iBMAcontrolLM}},
 \code{\link{contabs}}
 }

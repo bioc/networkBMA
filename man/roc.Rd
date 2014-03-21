@@ -90,18 +90,11 @@ reference <- dream4gold10[[network]]
 selfR <- any(as.character(reference[,1]) == as.character(reference[,2]))
 selfR
 
-# determine network size
-size <- nrow(reference)
-if (!selfR && selfN) {
-# add self loops to size of network with all possible edges
- size <- size + length(unique(as.vector(reference[,1:2])))
-} 
-
 # restrict reference to edges; first two columns (gene) only
 reference <- reference[reference[,3] == 1,1:2]
 
 contingencyTables <- contabs(network = edges1ts10, reference = reference,
-                             size = size)
+                             size = 100)
 
 roc(contingencyTables)
 prc(contingencyTables)
