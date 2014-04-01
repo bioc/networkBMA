@@ -115,9 +115,8 @@ reg.known
 \section{Network Modeling}
 Given the yeast expression data from the Rapamycin experiments, the
 {\tt networkBMA} function can be invoked to estimate the probabilities
-of regulatory relationships using either ScanBMA (the default
-''algorithm'') or iterative Bayesian Model Averaging (Yeung
-et~al. 2005, 2011) (by setting the parameter ''algorithm=iBMA''). The
+of regulatory relationships using either ScanBMA
+or iterative Bayesian Model Averaging (Yeung et~al. 2005, 2011). The
 ScanBMA algorithm, as shown in Algorithm 1, is preferred when
 available. The parameter ''prior.prob'' indicates the prior
 probabilities of regulatory relationships.  If the parameter
@@ -149,7 +148,7 @@ specifying the number of ordered variables (parameter ''nvar") to be included in
 modeling.  In both algorithms ScanBMA and iBMA, all the candidate
 variables (genes) are initially ranked using the method specified in
 ''ordering", and the top ''nvar" such variables will be used as input
-in the BMA regression step.  Note that if ''algorithm" is set to ''ScanBMA", the
+in the BMA regression step.  Note that if ScanBMA is used, the
 parameter ''ordering" will have no effect in the BMA regression step.
 
 Differentiation can also be performed on edges returned with
@@ -162,8 +161,7 @@ ScanBMA as the algorithm, as above.
 edges.iBMA <- networkBMA(data = timeSeries[,-(1:2)], 
                           nTimePoints = length(unique(timeSeries$time)), 
                           prior.prob = reg.prob, known = reg.known,
-                          algorithm = "iBMA", nvar = 50,
-                          control = iBMAcontrolLM(),
+                          nvar = 50, control = iBMAcontrolLM(),
                           ordering = "bic1+prior", diff100 = FALSE,
                           diff0 = FALSE)
 edges.iBMA[1:9,]

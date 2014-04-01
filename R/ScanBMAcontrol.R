@@ -3,7 +3,7 @@ ScanBMAcontrol <- function(OR = 100,
                            gCtrl = gControl(),
                            thresProbne0 = 1) { 
 
-  list( OR = OR, useg = useg, gCtrl = gCtrl,
+  list( algorithm = "ScanBMA", OR = OR, useg = useg, gCtrl = gCtrl,
         thresProbne0 = thresProbne0 );
 
 }

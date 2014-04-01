@@ -10,7 +10,7 @@
 \usage{
 networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL, 
            ordering = "bic1+prior", nvar = NULL, self = TRUE, 
-           maxreg = NULL, algorithm = "ScanBMA",
+           maxreg = NULL, 
            control = ScanBMAcontrol(),
            diff0 = TRUE, diff100 = TRUE,
            verbose = FALSE) 
@@ -66,12 +66,6 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
      gene in the network. If provided, this is used to help reduce the 
      amount of memory used for the computations.
   }
-   \item{algorithm}{
-     A character string indicating which version of BMA to use. ScanBMA
-     is the default option and is recommended, but \code{"iBMA"} can be used
-     for iterative BMA. If \code{known} is not NULL, then \code{"iBMA"}
-     must be used.
-   }  
   \item{control}{
      A list of control variables affecting the BMA computations.
      The functions \code{ScanBMAcontrol} for \code{optimize="ScanBMA"}

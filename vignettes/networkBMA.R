@@ -11,7 +11,6 @@ dim(reg.prob)
 dim(brem.data)
 reg.known
 
-
 ###################################################
 ### code chunk number 2: yeastScanBMA
 ###################################################
@@ -29,8 +28,7 @@ edges.ScanBMA[1:9,]
 edges.iBMA <- networkBMA(data = timeSeries[,-(1:2)], 
                           nTimePoints = length(unique(timeSeries$time)), 
                           prior.prob = reg.prob, known = reg.known,
-                          algorithm = "iBMA", nvar = 50,
-                          control = iBMAcontrolLM(),
+                          nvar = 50, control = iBMAcontrolLM(),
                           ordering = "bic1+prior", diff100 = FALSE,
                           diff0 = FALSE)
 edges.iBMA[1:9,]

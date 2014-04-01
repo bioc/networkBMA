@@ -4,17 +4,19 @@ function(data, nTimePoints, prior.prob = NULL, known = NULL,
          maxreg = NULL, control = iBMAcontrolLM(thresProbne0 = 5),
          verbose = FALSE) {
   networkBMA( data, nTimePoints, prior.prob, known, ordering, nvar, self,
-              maxreg, "iBMA", control, FALSE, FALSE, verbose );
+              maxreg, control, FALSE, FALSE, verbose );
 }
 
 networkBMA <- function(data, nTimePoints, prior.prob = NULL, known = NULL, 
                        ordering = "bic1+prior", nvar = NULL, self = TRUE, 
-                       maxreg = NULL, algorithm="ScanBMA",
+                       maxreg = NULL, 
                        control = ScanBMAcontrol(),
                        diff0 = TRUE, diff100 = TRUE,
                        verbose = FALSE) {
 
 ## if (!exists("bicreg")) library("BMA")
+
+  algorithm <- control$algorithm
 
   vprint <- function(...){;}
   vcat <- function(...){;}
@@ -60,6 +62,7 @@ networkBMA <- function(data, nTimePoints, prior.prob = NULL, known = NULL,
   yIndex  <- which(as.logical(match( rep(Times, nReplicates), Times[-1], 
                               nomatch = 0)))
 
+   cat("HERE\n")
   # xIndex is yIndex - 1
 
   k <- 0

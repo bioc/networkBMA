@@ -68,11 +68,13 @@ BMA.Diff.BIC <- function( x, y, prior.probs, result, diff100, diff0 ) {
   probne0[1:n] <- result$probne0;
   ak <- rep(0, npred);
   if ( diff100 ) {
+    if (is.null(diffres$adjProb100)) stop("NULL100")
     diffres$adjProb100[is.na(diffres$adjProb100)] <- 100;
     ak[probne0==100] <- diffres$Ak100;
     probne0[probne0 == 100] <- diffres$adjProb100 * 100;
   }
   if ( diff0 ) {
+    if (is.null(diffres$adjProb0)) stop("NULL0")
     diffres$adjProb0[is.na(diffres$adjProb0)] <- 0;
     ak[probne0==0] <- diffres$Ak0;
     probne0[probne0 == 0] <- diffres$adjProb0 * 100;
