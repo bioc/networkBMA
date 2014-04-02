@@ -62,7 +62,6 @@ networkBMA <- function(data, nTimePoints, prior.prob = NULL, known = NULL,
   yIndex  <- which(as.logical(match( rep(Times, nReplicates), Times[-1], 
                               nomatch = 0)))
 
-   cat("HERE\n")
   # xIndex is yIndex - 1
 
   k <- 0
