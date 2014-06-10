@@ -1,5 +1,5 @@
 Package: networkBMA
-Version: 1.7.0
+Version: 1.7.1
 Date: 2014--04--02
 Author: Chris Fraley, Wm. Chad Young, Ka Yee Yeung, Adrian Raftery
                (with contributions from Kenneth Lo)
@@ -13,5 +13,6 @@ Depends: R (>= 2.15.0), stats, utils, BMA, Rcpp (>= 0.10.3),
 LinkingTo: Rcpp, RcppArmadillo, RcppEigen
 License: GPL (>= 2)
 Maintainer: Ka Yee Yeung <kayee@u.washington.edu>
-biocViews: GraphsAndNetworks, NetworkInference
+biocViews: GraphsAndNetwork, NetworkInference, GeneExpression, GeneTarget, 
+           Network, Bayesian
 Packaged: 2014-03-17 19:30:41 UTC; wmchad
