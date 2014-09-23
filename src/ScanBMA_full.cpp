@@ -9,10 +9,13 @@ using namespace Rcpp;
 // which unordered_set to use
 #include "config.h"
 #if HAVE_UNORDERED_SET
+#include <unordered_set>
 #define UNORDERED_SET_TYPE std::unordered_set
 #elif HAVE_TR1_UNORDERED_SET
+#include <tr1/unordered_set>
 #define UNORDERED_SET_TYPE std::tr1::unordered_set
 #else
+#include <set>
 #define UNORDERED_SET_TYPE std::set
 #endif
 
