@@ -1,5 +1,5 @@
 Package: networkBMA
-Version: 1.13.0
+Version: 1.13.1
 Date: 2014--04--02
 Author: Chris Fraley, Wm. Chad Young, Ka Yee Yeung, Adrian Raftery
                (with contributions from Kenneth Lo)
@@ -15,4 +15,4 @@ License: GPL (>= 2)
 Maintainer: Ka Yee Yeung <kayee@u.washington.edu>
 biocViews: GraphsAndNetwork, NetworkInference, GeneExpression, GeneTarget, 
            Network, Bayesian
-Packaged: 2014-03-17 19:30:41 UTC; wmchad
+Packaged: 2016-02-26 21:30:41 UTC; wmchad

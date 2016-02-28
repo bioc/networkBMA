@@ -19,6 +19,7 @@
 
 \usepackage{epsfig,subfigure,lscape}
 \usepackage[lined,ruled]{algorithm2e}
+\usepackage{hyperref}
 
 \renewcommand\theequation{\thesection.\arabic{equation}}
 
@@ -51,6 +52,16 @@ This document illustrates the use of the {\tt networkBMA} R package
 ({\it Saccharomyces cerevisiae}) from
 microarray data measuring time-dependent gene-expression levels in 95 
 genotyped yeast segregants subjected to a drug (rapamycin) perturbation.
+
+\textit{Note: this package depends on the} \texttt{rcppArmadillo}
+\textit{package, which is known to cause errors on OS X Mavericks and
+  El Capitan due to a versioning issue of the gfortran library. This
+  error is discussed in detail}
+\href{http://thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error/}{here}. \textit{From
+  that website, the solution is to go to}
+\url{http://r.research.att.com/libs/} \textit{and download
+  gfortran-4.8.2-darwin13.tar.bz2. Extract the package in ~/, which is
+  root. The files should be unpacked into /usr/local/...}
 
 \section{Data}
 
@@ -151,16 +162,22 @@ variables (genes) are initially ranked using the method specified in
 in the BMA regression step.  Note that if ScanBMA is used, the
 parameter ''ordering" will have no effect in the BMA regression step.
 
-Differentiation can also be performed on edges returned with
-0\% or 100\% posterior probability. To include known regulatory
+Differentiation can also be performed on edges returned with 0\% or
+100\% posterior probability. To include known regulatory
 relationships, the iBMA algorithm must be used. This can be done as
 shown below, but the results shown subsequently will use the call with
-ScanBMA as the algorithm, as above.
+ScanBMA as the algorithm, as above. Note that a running time of hours
+up to a few days is normal when analyzing datasets containing
+thousands of genes.
 
 <<yeastiBMA>>=
-edges.iBMA <- networkBMA(data = timeSeries[,-(1:2)], 
+tsVar <- which(names(timeSeries) %in%
+               unique(c(reg.known$Regulator, reg.known$TargetGene)))
+timeSeriesData <- timeSeries[,tsVar]
+timeSeriesProbs <- reg.prob[tsVar-2,tsVar-2]
+edges.iBMA <- networkBMA(data = timeSeriesData, 
                           nTimePoints = length(unique(timeSeries$time)), 
-                          prior.prob = reg.prob, known = reg.known,
+                          prior.prob = timeSeriesProbs, known = reg.known,
                           nvar = 50, control = iBMAcontrolLM(),
                           ordering = "bic1+prior", diff100 = FALSE,
                           diff0 = FALSE)
@@ -266,11 +283,12 @@ the default contingency tables, in which the
 threshholds are all values for posterior probabilities that
 appear in {\tt edges.ScanBMA}.
 <<rocANDprc>>=
-roc( contabs.netwBMA( edges.ScanBMA, referencePairs), plotit = TRUE)
-title("ROC")
+## Not run
+## roc( contabs.netwBMA( edges.ScanBMA, referencePairs), plotit = TRUE)
+## title("ROC")
 
-prc( contabs.netwBMA( edges.ScanBMA, referencePairs), plotit = TRUE)
-title("Precision-Recall")
+## prc( contabs.netwBMA( edges.ScanBMA, referencePairs), plotit = TRUE)
+## title("Precision-Recall")
 @
 
 The resulting plots are shown in Figure \ref{fig:rocANDprc}.
@@ -328,8 +346,9 @@ variables <- which(rownames(brem.data) != gene)
 control <- ScanBMAcontrol(OR = 20, useg = TRUE,
                           gCtrl = gControl(optimize = FALSE, g0 = 20))
 
-ScanBMAmodel.YNL037C <- ScanBMA( x = t(brem.data[variables,]),
-                  y = unlist(brem.data[gene,]), control = control)
+ScanBMAmodel.YNL037C <- ScanBMA(x = t(brem.data[variables,]),
+                                y = unlist(brem.data[gene,]),
+                                prior.prob = 0.1, control = control)
 @
 
 Function {\tt ScanBMAcontrol} facilitates input of BMA control
@@ -341,9 +360,12 @@ the use of Zellner's \textit{g}-prior, including whether to use a
 static \textit{g} or optimize \textit{g} using an EM algorithm.  See
 the R help documentation for {\tt ScanBMAcontrol} and {\tt gControl}
 for detailed description of these parameters, and Hoeting
-et~al. (1999) for a tutorial on the underlying BMA paradigm.  The
-estimated posterior probabilities (in percent) for genes that regulate
-{\tt YBL103C} can be seen as follows:
+et~al. (1999) for a tutorial on the underlying BMA paradigm. The {\tt
+  prior.prob} parameter allows prior probabilities to be used. If just
+a scalar is provided, it is used for all regulators. A vector
+corresponding to unique priors for each regulator can also be
+provided. The estimated posterior probabilities (in percent) for genes
+that regulate {\tt YBL103C} can be seen as follows:
 
 <<probne0>>=
 ScanBMAmodel.YNL037C$probne0[ScanBMAmodel.YNL037C$probne0 > 0]
