@@ -13,7 +13,7 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
            maxreg = NULL, 
            control = ScanBMAcontrol(),
            diff0 = TRUE, diff100 = TRUE,
-           verbose = FALSE) 
+           verbose = FALSE)
 }
 \arguments{
   \item{data}{
@@ -56,6 +56,8 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
      is greater than 1, otherwise it is \code{min(nrow(data),ncol(data)-1)}.
      The maximum number of genes for which measurements are available is 
      \code{nrow(data)}.
+	 If fastBMA algorithm is choosen, this parameter ignored, nVars in
+	 \code{fastBMAcontrol} used instead
  }
   \item{self}{
      A logical variable indicating whether or not to allow self edges in
@@ -69,21 +71,23 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
   \item{control}{
      A list of control variables affecting the BMA computations.
      The functions \code{ScanBMAcontrol} for \code{optimize="ScanBMA"}
-     and \code{iBMAcontrolLM} for \code{optimize="iBMA"} are provided to
-     faciltate this setting, and the default is
-     \code{ScanBMAcontrol()}. 
+     and \code{iBMAcontrolLM} for \code{optimize="iBMA"} and
+	 \code{fastBMAcontrol} for \code{optimize="fastBMA"}are provided to
+     faciltate this setting, and the default is \code{ScanBMAcontrol()}. 
    }
    \item{diff0}{
      A logical variable indicating whether to differentiate between
      edges with posterior probability of 0. This includes regulators not
      included from when \code{nvar} is less than the total number of
      possible regulators. If \code{known} is not NULL, then \code{diff0}
-     must be FALSE.
-     }
+     must be FALSE. If \code{fastBMA} algorithm used, then \code{diff0}
+	 must be FALSE.
+   }
    \item{diff100}{
      A logical variable indicating whether to differentiate between
      edges with posterior probability of 1.0. If \code{known} is not
-     NULL, then \code{diff100} must be FALSE.
+     NULL, then \code{diff100} must be FALSE. If \code{fastBMA} algorithm
+	 used, then \code{diff100} must be FALSE.
      }
   \item{verbose}{
      A logical variable indicating whether or not a detailed information 
@@ -128,6 +132,9 @@ networkBMA(data, nTimePoints, prior.prob = NULL, known = NULL,
   K. Y. Yeung, A. E. Raftery and C. Fraley (2012),
   Uncovering regulatory relationships in yeast using \code{networkBMA},
   \code{networkBMA} Bioconductor package vignette.
+  
+  L. H. Hong, M. Wu1, A. Lee, W. C. Young, A. E. Raftery and K. Y. Yeung,
+  FastBMA and Transitive Reduction for Gene Network Inference. [in preparation]
 }
 \seealso{
 \code{\link{summary.networkBMA}},
@@ -148,5 +155,9 @@ edges1ts10 <- networkBMA( data = dream4ts10[[network]][,-(1:2)],
                            nTimePoints = nTimePoints, prior.prob = 0.01)
 
 summary(edges1ts10)
+
+edges1ts10.fastBMA <- networkBMA(data=dream4ts10[[network]][,-(1:2)], nTimePoints = nTimePoints,
+                          control=fastBMAcontrol(optimize <- 4))
+summary(edges1ts10.fastBMA)
 }
 \keyword{models}

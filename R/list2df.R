@@ -1,5 +1,6 @@
 ## Edited to allow tie breakers (aks)
 list2df <- function(edgeList, aks = NULL, full = FALSE) {
+  #print("start list2df")
   onam <- names(edgeList)
   tiebreak <- NULL;
   if (!is.null(aks) && is.numeric(edgeList[!sapply(aks, is.null)][[1]])) {
@@ -13,6 +14,7 @@ list2df <- function(edgeList, aks = NULL, full = FALSE) {
   inam <- unlist(edgeList)
   edgeList <- lapply(edgeList, unlist)
   lev <- union(onam, unique(inam))
+  
   if (full) {
     ll <- length(lev)
     mat <- data.frame(regulator = as.factor(rep(lev, 
@@ -21,7 +23,7 @@ list2df <- function(edgeList, aks = NULL, full = FALSE) {
       stop("not fixed to handle probabilities")
     }
   }
-  else {
+  else {  
     if (is.null(prob)) {
       mat <- data.frame(regulator = factor(inam, levels = lev), 
                         gene = factor(rep(onam, sapply(edgeList, length)), 
@@ -30,6 +32,7 @@ list2df <- function(edgeList, aks = NULL, full = FALSE) {
     }
     else {
       if ( is.null(tiebreak) ) {
+	    #print("check point")
         mat <- data.frame(regulator = factor(inam, levels = lev), 
                           gene = factor(rep(onam, sapply(edgeList, length)), 
                           levels = lev), post.prob = prob);
@@ -39,10 +42,12 @@ list2df <- function(edgeList, aks = NULL, full = FALSE) {
         mat <- data.frame(regulator = factor(inam, levels = lev), 
                           gene = factor(rep(onam, sapply(edgeList, length)), 
                           levels = lev), post.prob = prob, tiebreak = tiebreak);
+		
         colnames(mat) <- c( "Regulator", "TargetGene", "PostProb", "Tiebreak" );
       }
     }
   }
   rownames(mat) <- NULL
+  #print("finish list2df")
   mat
 }

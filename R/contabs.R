@@ -54,8 +54,14 @@ function (network, reference, size, thresholds = NULL)
         mat
     }
 
+	print("network Before:")
+	print(network)
+	
     if (is.null(dim(network))) 
         network <- list2df(network)
+	
+	print("network After:")
+	print(network)
 
     if (ncol(network) == 3) {
         prob <- network[, 3] 
@@ -66,6 +72,9 @@ function (network, reference, size, thresholds = NULL)
       prob <- rep(1, nrow(network))
    }
 
+   print("probs:")
+   print(prob)
+   
    if (any(prob > 1)) stop("network: use probabilities not percentages")
 
    if (is.null(dim(reference))) reference <- list2df(reference)

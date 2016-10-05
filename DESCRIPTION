@@ -1,7 +1,7 @@
 Package: networkBMA
-Version: 1.15.0
-Date: 2014--04--02
-Author: Chris Fraley, Wm. Chad Young, Ka Yee Yeung, Adrian Raftery
+Version: 2.11.6
+Date: 2016--10--4
+Author: Chris Fraley, Wm. Chad Young, Ling-Hong Hung, Kaiyuan Shi, Ka Yee Yeung, Adrian Raftery
                (with contributions from Kenneth Lo)
 Title: Regression-based network inference using Bayesian Model
         Averaging
@@ -10,9 +10,10 @@ Description: An extension of Bayesian Model Averaging (BMA) for network
                 Includes assessment functions and sample test data.
 Depends: R (>= 2.15.0), stats, utils, BMA, Rcpp (>= 0.10.3),
         RcppArmadillo (>= 0.3.810.2), RcppEigen (>= 0.3.1.2.1)
-LinkingTo: Rcpp, RcppArmadillo, RcppEigen
+LinkingTo: Rcpp, RcppArmadillo, RcppEigen, BH
 License: GPL (>= 2)
 Maintainer: Ka Yee Yeung <kayee@u.washington.edu>
-biocViews: GraphsAndNetwork, NetworkInference, GeneExpression, GeneTarget, 
-           Network, Bayesian
-Packaged: 2016-02-26 21:30:41 UTC; wmchad
+biocViews: GraphsAndNetwork, NetworkInference, GeneExpression,
+        GeneTarget, Network, Bayesian
+Packaged: 2016-10-04 20:59:06 UTC; lhhung
+NeedsCompilation: yes
