@@ -1272,6 +1272,8 @@ extern "C"{
 
 //wrappers for OpenBLAS/LAPACK - can be easily modified to use regular BLAS
 //right now the inputs are simplified for the fastBMA use - the full set of input parms can be added later for full BLAS function if needed
+//this version has cblas and lapacke headers from netlib and the wrappers for potrf modified for use with netlib BLAS libraries for R compatibility
+
 
 //multiply vector by transpose of matrix	wraps dgemv/sgemv
 void mtrv(int nRows, int nCols, float *A, int Aldr, float *b, float *ATb);
@@ -2262,14 +2264,10 @@ template <class T> void qhqr (int nRows,int nCols,T *R, int ldr,T *c,T *s){
 void sqmm(int nRows,int nCols,float *A,int Aldr, float *ATA,int ATAldr){cblas_sgemm(CblasColMajor, CblasTrans, CblasNoTrans, nCols,nCols,nRows,1,A,Aldr,A,Aldr,0,ATA,ATAldr);}	
 void sqmm(int nRows,int nCols,double *A,int Aldr, double *ATA,int ATAldr){cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, nCols,nCols,nRows,1,A,Aldr,A,Aldr,0,ATA,ATAldr);}
 void sqmm(int nRows,int nCols,float *A,int Aldr, float *ATA,int ATAldr,int nThreads){
-	openblas_set_num_threads(nThreads);
 	cblas_sgemm(CblasColMajor, CblasTrans, CblasNoTrans, nCols,nCols,nRows,1,A,Aldr,A,Aldr,0,ATA,ATAldr);
-	openblas_set_num_threads(1);
 	}	
 void sqmm(int nRows,int nCols,double *A,int Aldr, double *ATA,int ATAldr,int nThreads){
-	openblas_set_num_threads(nThreads);
 	cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, nCols,nCols,nRows,1,A,Aldr,A,Aldr,0,ATA,ATAldr);
-	openblas_set_num_threads(1);
 	}	
 void mtrv(int nRows, int nCols, double *A, int Aldr, double *b, double *ATb){cblas_dgemv(CblasColMajor, CblasTrans, nRows,nCols,1,A,Aldr,b,1,0,ATb,1);}
 void mtrv(int nRows, int nCols, float *A, int Aldr, float *b, float *ATb){cblas_sgemv(CblasColMajor, CblasTrans, nRows,nCols,1,A,Aldr,b,1,0,ATb,1);  }
@@ -2282,18 +2280,18 @@ void axpy (int n,float a,float *x,float *y){cblas_saxpy(n,a,x,1,y,1);}
 void trsvutr(int n,float *R, int Rldr, float *v){cblas_strsv(CblasColMajor,CblasUpper,CblasTrans,CblasNonUnit,n,R,Rldr,v,1); }	
 void trsvutr(int n,double *R, int Rldr, double *v){cblas_dtrsv(CblasColMajor,CblasUpper,CblasTrans,CblasNonUnit,n,R,Rldr,v,1); }
 void potrf(char ul,int n,double *R,int Rldr){
- blasint m=n;
- blasint ldr=Rldr;
- blasint info;
  char uplo=ul;
- BLASFUNC(dpotrf)(&uplo, &m, R, &ldr, &info);
+ int m=n;
+ int lda=Rldr;
+ int info;
+ LAPACK_dpotrf(&uplo,&m,R,&lda,&info);
 } 
 void potrf(char ul ,int n,float *R,int Rldr){
- blasint m=n;
- blasint ldr=Rldr;
- blasint info;
  char uplo=ul;
- BLASFUNC(spotrf)(&uplo, &m, R, &ldr, &info);
+ int m=n;
+ int lda=Rldr;
+ int info;
+ LAPACK_spotrf(&uplo,&m,R,&lda,&info);
 }
 
 //these routines are necessary as overloading the = operator requires that both ModelIndices and Const/CompactIndices be predeclared which requires wrapper class or redoing this as shared/inherited classes

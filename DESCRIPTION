@@ -15,5 +15,5 @@ License: GPL (>= 2)
 Maintainer: Ka Yee Yeung <kayee@u.washington.edu>
 biocViews: GraphsAndNetwork, NetworkInference, GeneExpression,
         GeneTarget, Network, Bayesian
-Packaged: 2016-10-04 20:59:06 UTC; lhhung
+Packaged: 2016-10-12 02:01:28 UTC; lhhung
 NeedsCompilation: yes
