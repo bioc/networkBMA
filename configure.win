@@ -1,5 +1,0 @@
-#! /bin/sh
-#compile OpenBLAS
-#cd src/OpenBLAS
-#make PREFIX=.. install
-
