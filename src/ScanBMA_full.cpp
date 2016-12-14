@@ -1,6 +1,7 @@
 // [[Rcpp::depends(RcppArmadillo)]] 
 // [[Rcpp::depends(RcppEigen)]] 
 
+#define  EIGEN_NO_DEBUG
 #include <RcppArmadillo.h>
 #include <RcppEigen.h>
 using namespace Rcpp;

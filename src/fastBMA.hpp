@@ -1272,8 +1272,6 @@ extern "C"{
 
 //wrappers for OpenBLAS/LAPACK - can be easily modified to use regular BLAS
 //right now the inputs are simplified for the fastBMA use - the full set of input parms can be added later for full BLAS function if needed
-//this version has cblas and lapacke headers from netlib and the wrappers for potrf modified for use with netlib BLAS libraries for R compatibility
-
 
 //multiply vector by transpose of matrix	wraps dgemv/sgemv
 void mtrv(int nRows, int nCols, float *A, int Aldr, float *b, float *ATb);
