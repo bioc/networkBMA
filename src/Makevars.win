@@ -1,6 +1,4 @@
 PKG_CPPFLAGS = -DWIN=1 -I./include -I.
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) $(CXX1XSTD)
-PKG_CFLAGS =  $(SHLIB_OPENMP_CFLAGS)
+PKG_CFLAGS = $(SHLIB_OPENMP_CFLAGS)
 PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(SHLIB_OPENMP_CXXFLAGS)  $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-PKG_LIBS += -L$(LIB_GSL)$(R_ARCH)/lib -lgsl -lgslcblas -lm
-PKG_CPPFLAGS += -I $(RHOME)/src/include -I$(LIB_GSL)$(R_ARCH)/include
