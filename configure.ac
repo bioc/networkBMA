@@ -6,7 +6,7 @@ AC_CHECK_HEADERS([unordered_set tr1/unordered_set])
 AC_CONFIG_FILES([src/Makevars])
 ## BLAS.
 # I did not find any BLAS libraries, (R is probably not well configured)
-if test "${BLAS_LIBS}" = ""; then
+#if test "${BLAS_LIBS}" = ""; then
   BLAS_LIBS="-lgslcblas"
-fi
+#fi
 AC_OUTPUT()
