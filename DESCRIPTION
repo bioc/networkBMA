@@ -1,5 +1,5 @@
 Package: networkBMA
-Version: 2.11.7
+Version: 2.11.8
 Date: 2016--10--4
 Author: Chris Fraley, Wm. Chad Young, Ling-Hong Hung, Kaiyuan Shi, Ka Yee Yeung, Adrian Raftery
                (with contributions from Kenneth Lo)
@@ -11,6 +11,7 @@ Description: An extension of Bayesian Model Averaging (BMA) for network
 Depends: R (>= 2.15.0), stats, utils, BMA, Rcpp (>= 0.10.3),
         RcppArmadillo (>= 0.3.810.2), RcppEigen (>= 0.3.1.2.1), leaps
 LinkingTo: Rcpp, RcppArmadillo, RcppEigen, BH
+SystemRequirements: liblapack-dev
 License: GPL (>= 2)
 Maintainer: Ka Yee Yeung <kayee@u.washington.edu>
 biocViews: GraphsAndNetwork, NetworkInference, GeneExpression,
