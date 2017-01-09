@@ -27,7 +27,12 @@
 #include <boost/serialization/string.hpp>
 namespace mpi = boost::mpi;
 #endif
-#include <cblas.h> //this must go AFTER and not before the boost mpi headers for some reason
+#ifdef USE_RBLAS
+ #include <blas.h> //this must go AFTER and not before the boost mpi headers for some reason
+#else 
+ #include <cblas.h> //this must go AFTER and not before the boost mpi headers for some reason
+#endif
+
 #include <lapacke.h>
 //include the following because macs don't have clockgettime
 #ifdef MAC_OS
@@ -1782,339 +1787,7 @@ template <class T> int findRegulators(T g,int optimizeBits,int maxOptimizeCycles
 	return(nEdges);
 }
    
-/*template <class T> T** readTimeData(string matrixFile,vector <string> &headers,int &nGenes,int &nSamples,int &nRows,int &nTimes,bool noHeader,bool useResiduals,string residualsFile){	
-	//returns data matrix data[0:nGenes-1][0:nSamples-1];
-	//this is converted to the correct response and data vectors for the regression later
-	//nTimes is needed for timeSeries calculations which takes a response and regresses it to data from the previous time point - nTimes is needed to exclude the responses from the first of a timePoint
-	//for non-timeSeries calculations the response is regressed to itself minus the response
-	//for timeSeries with residuals - this does a linear regression and removes the influence from the previous timepoint AND REDUCES the size of the data matrix - this must be taken into account when returning the dataMatrix as it will be passed as a single block by MPI
-	//nRows is different than nSamples as it determines the size of the regression arrays that will result from input
-	ifstream inFile(matrixFile,ios::in);
- int nLines=0,nFields=0;
- nTimes=0;
- nGenes=0;
- const T uniform_prob=(T) UNIFORM_PRIOR;
-	T **tempData=0;
- string token,line;
- //only read in if process 0
-	nLines=std::count(std::istreambuf_iterator<char>(inFile),  std::istreambuf_iterator<char>(), '\n'); 
- inFile.clear(); inFile.seekg(0, std::ios::beg); //rewind file
- if (!inFile.is_open()){
-		cerr << "error opening " << matrixFile << endl;
-		exit(0);
-	}
-	//first line is headings line - with fields 'Identifier Replicate/Group Genes"
- if ( getline (inFile,line,'\n') ){
-	 std::istringstream iss(line);
-	 nFields=std::count(std::istreambuf_iterator<char>(iss),  std::istreambuf_iterator<char>(), '\t')+1;
-		iss.clear(); iss.seekg(0, std::ios::beg);
-	 if(noHeader){
-			inFile.seekg(0);
-		}	
-		else{
-   headers.resize(0);
-   headers.reserve(nGenes);
-   getline(iss, token, '\t');getline(iss, token, '\t');getline(iss, token, '\t'); //skip 3 fields for headers
-   while(getline(iss, token, '\t')){
-		 	if(token[0] == '"'){
-     headers.push_back(token.substr(1,token.size()-2));
-		  }
-		  else headers.push_back(token);		
-		 }
-		}
-	}
-	nGenes=nFields-3;
- nSamples=(noHeader)? nLines:nLines-1;
 
-	//allocate and read data of sufficient size
-	T **data=new T*[nGenes];
-	data[0]=new T[nGenes*nSamples]; 
-	 
- for(int i=1;i<nGenes;i++) data[i]=data[i-1]+nSamples;	
-	int *samples=new int[nSamples];
-	int n=0;
- while( getline (inFile,line,'\n') ){
-		std::istringstream iss(line);
-		getline(iss, token, '\t');//sample name		
-		if (getline(iss, token, '\t')){//sample name
-		 if(token[0] == '"'){
-		 	samples[n]=atoi((token.substr(1,token.size()-2)).c_str());
-		 }
-		 else
-		 	samples[n]=atoi(token.c_str());
-		 }
-		 getline(iss, token, '\t');//sample time
-		 	//split each element into tokens
-		 int j=0;
-			while(getline(iss, token, '\t')){
-			 data[j++][n]=(T) atof(token.c_str());
-   }
-   n++;
-		}
-  inFile.close();
-  //count times and groups
-		int nGroups=0;
-		for (int i=0;i<n;i++){
-			if(i==0 || samples[i] != samples[i-1]){
-			 nGroups++;
-			}	
-		 if(samples[i]==1){
-			 nTimes++;
-			}
-		}	
-		if(useResiduals){
-			T *residuals=new T[(nTimes-1)*nGroups];
-			for (int g=0;g<nGenes;g++){
-				T* const values=data[g];
-				TimeSeriesValuesToResiduals(values,residuals,nTimes,nGroups);
-				memmove(data[g],residuals,nSamples*sizeof(T));
-			}
-			if(residualsFile != ""){
-			 FILE *rfp=fopen(residualsFile.c_str(),"w");
-			 if(rfp){
-			  for (int i=0;i<nSamples;i++){
-			   for (int g=0;g<nGenes-1;g++){
-				 	 fprintf(rfp,"%f\t",data[g][i]);
-			 		}
-			 		fprintf(rfp,"%f\n",data[nGenes-1][i]);
-			  }
-			  fclose(rfp);				
-			 }	
-		 }
-		 //adjust nSamples and nTime to reflect the reduced size of the residual matrix
-		 nTimes--; //the number of Times is reduced by 1 because first timepoint is eliminated from raw data
-		 nSamples=nTimes*nGroups;
-		 //copy the data to residData
-		 //allocate data
-		 T **residData=0;
-		 residData=new T*[nGenes];
-	  residData[0]=new T[nGenes*nSamples]; 
-		 for(int k=1;k<nGenes;k++)residData[k]=residData[k-1]+nSamples;
-	 	//copy data
-	 	for(int k=0;k<nGenes;k++){
-	 		memmove(residData[k],data[k],nSamples*sizeof(T));
-	 	}
-	 	delete[]data[0];
-		 delete[]data;		
-		 delete[]residuals;
-		 nRows=(nTimes-1)*nGroups;
-		 return(residData);
-		}
-		delete[] samples;
-		nRows=(nTimes-1)*nGroups;
-		return(data);
-	}*/
-	
-/*template <class T> T** readData(string matrixFile,vector <string> &headers,int &nGenes,int &nSamples,bool noHeader){
-		//returns data matrix data[0:nGenes-1][0:nRows-1];
-	ifstream inFile(matrixFile,ios::in);
-	int nLines=std::count(std::istreambuf_iterator<char>(inFile),  std::istreambuf_iterator<char>(), '\n'); 
-	inFile.clear(); inFile.seekg(0, std::ios::beg); //rewind file
- if (!inFile.is_open())return(0);
-	string token,line,*headings=0;
-	nGenes=0;
-	T **data=0;
- nSamples=(noHeader)? nLines:nLines-1;
-	//first line is headings line - with fields 'Sample id GeneNames"
-	if ( getline (inFile,line,'\n') ){
-		std::istringstream iss(line);
-		int nFields=std::count(std::istreambuf_iterator<char>(iss),  std::istreambuf_iterator<char>(), '\t')+1;
-		iss.clear(); iss.seekg(0, std::ios::beg);
-		nGenes=nFields-1;
-		data=new T*[nGenes];
-		data[0]=new T[nGenes*nSamples];
-		for(int i=1;i<nGenes;i++) data[i]=data[i-1]+nSamples;
-		if(noHeader){
-			inFile.seekg(0);
-		}	
-		else{
-   headers.resize(0);
-   headers.reserve(nGenes);
-   getline(iss, token, '\t');
-   while(getline(iss, token, '\t')){
-		 	if(token[0] == '"'){
-     headers.push_back(token.substr(1,token.size()-2));
-		  }
-		  else headers.push_back(token);		
-		 }
-		}
-	}
-
-		//read the data
- int n=0;
- while ( getline (inFile,line,'\n') ){
-		std::istringstream iss(line);
-		getline(iss, token, '\t');//sample name		
-		//split each element into tokens
-		int j=0;
-		while(getline(iss, token, '\t')){
-			data[j++][n]=(T) atof(token.c_str());
-  }
-  n++;
-	}
- inFile.close();
-	return(data);
-}*/
-
-   
-/*EdgeList* readEdgeListFile(string edgeListFile, vector<string> &headers){
- //returns priors
-		ifstream inFile(edgeListFile,ios::in);	
-		vector <string> node1;
-		vector <string> node2;
-		vector <float> weights;
-		int j=0;
-		int n=0;
-		if (inFile.is_open()){
-		 string token,line;
-   while ( getline (inFile,line,'\n')){
-			 std::istringstream iss(line);
-			 if (getline(iss, token, '\t')){
-			 	node1.push_back(token);
-    }
- 			if (getline(iss, token, '\t')){
-			 	node2.push_back(token);
-    }
-    if (getline(iss, token, '\t')){
-			 	weights.push_back(atof(token.c_str()));
-			 	n++;
-    }
-		 }		 
-		 inFile.close();				
-	 }
-
-	 //set up index for nodes
-	 unordered_map <string,int> nameIndex;
-	 headers.resize(0);
-	 int nEdges=node1.size();
-  int nNodes=0;
-  vector<int> nParents(2*node1.size());
-  fill (nParents.begin(),nParents.begin()+nParents.size(),0);  
-  {
-   unordered_set <string> nameSeen;
-	  //create mapping to names
-	  for (int i=0;i<nEdges;i++){
-		 	if(!nameSeen.count(node2[i])){
-		  	nameSeen.insert(node2[i]);
-		   headers.push_back(node2[i]);
-		   nameIndex.insert(make_pair(node2[i],nNodes));
-		   nNodes++; 
-		  }
-		  nParents[nameIndex[node2[i]]]++;
-			}
-		 for (int i=0;i<nEdges;i++){		
-		  if(!nameSeen.count(node1[i])){
-		  	nameSeen.insert(node1[i]);
-		   headers.push_back(node1[i]);
-		   nameIndex.insert(make_pair(node1[i],nNodes));
-		   nNodes++;
-		  }
-			}
-		}
-	 //set up edgeList
-	 int np=0;
-	 EdgeList *edgeList= new EdgeList(nNodes);
-	 for (int i=0;i<nNodes;i++){
-			if(nParents[i]){
-				np+=nParents[i];
-    edgeList->parents[i]=new	int[nParents[i]];
-    edgeList->edgeWeights[i]=new	float[nParents[i]];
-			}
-			else{
-		 	edgeList->parents[i]=0;
-			 edgeList->edgeWeights[i]=0;	
-			}	
-   edgeList->nParents[i]=0;
-		} 
-		for (int i=0;i<nEdges;i++){
-			const int n=nameIndex[node2[i]];
-			const int p=edgeList->nParents[n];
-   edgeList->parents[n][p]=nameIndex[node1[i]];
-   edgeList->edgeWeights[n][p]=weights[i];
-   edgeList->nParents[n]++;
-		}
-		return(edgeList);	
-	}*/
-	
-/*template <class T> void readPriorsList(string priorsListFile,vector <string> names, T **priors, T uniform_prob){
- //returns priors
- //format is each gene is in the same order as the gene order of the matrix
- //all genes must be present - no empty fields
-  using namespace std; 
-  std::unordered_map<string,int> namesMap;
-  for(int i=0;i<names.size();i++){
-			namesMap[names[i]]=i;
-		}
-  for (int i=0;i<names.size();i++)
-   priors[0][i]=uniform_prob;
-  for (int i=1;i<names.size();i++)
-   memmove(priors[i],priors[0],sizeof(T)*names.size());  
-		ifstream inFile(priorsListFile,ios::in);	;
-		if (inFile.is_open()){
-   string line;    
-		 float value;
-		 char parent[1024],child[1024];		 
-   while ( getline (inFile,line,'\n')){
-			 sscanf(line.c_str(),"%s\t%s\t%f",&parent, &child, &value);    
-			 //expects first name to regulate second name
-			 string parentStr(parent); 
-			 auto parentit = namesMap.find(parentStr);
-			 if(parentit != namesMap.end()){
-				 string childStr(child);
-					auto childit=namesMap.find(childStr);
-			  if(childit != namesMap.end()){
-						priors[childit->second][parentit->second]=(value > MAXPRIOR)? MAXPRIOR: value;
-				 }
-				}
-			}		 
-		 inFile.close();				
-	 }
-	}*/	
-		
-/*template <class T> T** readPriorsMatrix(string priorsFile,int &nGenes){
- //returns priors
- //format is each gene is in the same order as the gene order of the matrix
- //all genes must be present - no empty fields 
-		ifstream inFile(priorsFile,ios::in);	
-		if (!inFile.is_open()){
-			cerr<< "unable to open " << priorsFile << endl;
-			exit(0);
-		}	
-  string token,line;
-		//first line is headings line
-		getline (inFile,line,'\n');
-		getline (inFile,line,'\n'); 
-		std::istringstream iss(line);
-		int nFields=std::count(std::istreambuf_iterator<char>(iss),  std::istreambuf_iterator<char>(), '\t')+1;
-	 nGenes=nFields-1; //first field is title
-	 //allocate matrix
-	 T **rProbs=new T*[nGenes];
-		rProbs[0]=new T[nGenes*nGenes];		
-		std::istringstream iss2(line);	
-		getline(iss2, token, '\t'); //first column is title
-  for(int i=1;i<nGenes;i++) rProbs[i]=rProbs[i-1]+nGenes;
-  {
-			int j=0;
-			while(getline(iss2, token, '\t')){
-				T value=(T) atof(token.c_str());
-				rProbs[j++][0]=(value > MAXPRIOR)? MAXPRIOR: value;
-   }
-		}
-  int n=1;
-  while ( getline (inFile,line,'\n') && n < nFields){
-			std::istringstream iss(line);
-			getline(iss, token, '\t'); //first column is title
-			int j=0;
-			while(getline(iss, token, '\t')){
-				T value=(T) atof(token.c_str());
-				rProbs[j++][n]=(value > MAXPRIOR)? MAXPRIOR: value;
-   }
-   n++;
-		}		 
-		inFile.close();
-		return(rProbs);					
-	}*/
-	
 template <class T> T calculate_sst(int sizeb, T *b,T *ones){      
  //calculate sst which is used to calculate the R2
   T bbar=dot(sizeb,b,ones)/(T)sizeb; //first column of A contains row of ones 
@@ -2258,7 +1931,39 @@ template <class T> void qhqr (int nRows,int nCols,T *R, int ldr,T *c,T *s){
 	}
 }	
 
+
+//routines are now wrapped to interface directly with BLAS routines
+//disable double precsion
+
 //wrappers for cblas routines -see predeclarations for description
+#ifdef USE_RBLAS
+
+ void sqmm(int nRows,int nCols,double *A,int Aldr, double *ATA,int ATAldr,int nThreads){
+		double one=1, zero=0;	
+ 	dgemm_("T","N",&nCols,&nCols,&nRows,&one,A,&Aldr,A,&Aldr,&zero,ATA,&ATAldr);
+ }	
+ void mtrv(int nRows, int nCols, double *A, int Aldr, double *b, double *ATb){
+  double done=1,dzero;
+  int ione=1,izero=0;
+ 	dgemv_("T",&nRows,&nCols,&done,A,&Aldr,b,&ione,&dzero,ATb,&ione);
+ }
+ void lartg (double* f, double* g, double* cs, double* sn, double* r){
+		dlartg_(f,g,cs,sn,r);
+	}	
+ double dot(int n,double *x,double *y){
+		int one=1;	
+		return(ddot_(&n,x,&one,y,&one));
+	}
+ void axpy (int n,double a,double *x,double *y){
+		int ione=1;
+		daxpy_(&n,&a,x,&ione,y,&ione);
+	}	
+ void trsvutr(int n,double *R, int Rldr, double *v){
+		int ione=1;
+	 dtrsv_("U","T","N",&n,R,&Rldr,v,&ione); 
+	}
+
+#else
 void sqmm(int nRows,int nCols,float *A,int Aldr, float *ATA,int ATAldr){cblas_sgemm(CblasColMajor, CblasTrans, CblasNoTrans, nCols,nCols,nRows,1,A,Aldr,A,Aldr,0,ATA,ATAldr);}	
 void sqmm(int nRows,int nCols,double *A,int Aldr, double *ATA,int ATAldr){cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, nCols,nCols,nRows,1,A,Aldr,A,Aldr,0,ATA,ATAldr);}
 void sqmm(int nRows,int nCols,float *A,int Aldr, float *ATA,int ATAldr,int nThreads){
@@ -2277,13 +1982,16 @@ void axpy (int n,double a,double *x,double *y){cblas_daxpy(n,a,x,1,y,1);}
 void axpy (int n,float a,float *x,float *y){cblas_saxpy(n,a,x,1,y,1);}
 void trsvutr(int n,float *R, int Rldr, float *v){cblas_strsv(CblasColMajor,CblasUpper,CblasTrans,CblasNonUnit,n,R,Rldr,v,1); }	
 void trsvutr(int n,double *R, int Rldr, double *v){cblas_dtrsv(CblasColMajor,CblasUpper,CblasTrans,CblasNonUnit,n,R,Rldr,v,1); }
+#endif
+
 void potrf(char ul,int n,double *R,int Rldr){
  char uplo=ul;
  int m=n;
  int lda=Rldr;
  int info;
  LAPACK_dpotrf(&uplo,&m,R,&lda,&info);
-} 
+}
+#ifndef USE_RBLAS 
 void potrf(char ul ,int n,float *R,int Rldr){
  char uplo=ul;
  int m=n;
@@ -2291,7 +1999,7 @@ void potrf(char ul ,int n,float *R,int Rldr){
  int info;
  LAPACK_spotrf(&uplo,&m,R,&lda,&info);
 }
-
+#endif
 //these routines are necessary as overloading the = operator requires that both ModelIndices and Const/CompactIndices be predeclared which requires wrapper class or redoing this as shared/inherited classes
 template <class T> void copy_indices(ModelIndices &dest,const CompactModelIndices<T>  &source){
 	dest.nModels=source.nModels;

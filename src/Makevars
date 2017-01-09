@@ -1,0 +1,4 @@
+CXX_STD = CXX11
+PKG_CPPFLAGS = -I./include
+PKG_CFLAGS = $(SHLIB_OPENMP_CFLAGS) -I.  
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"`  $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
