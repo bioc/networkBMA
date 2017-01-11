@@ -7,7 +7,11 @@
 #include <limits>
 #include "my_sort.hpp"
 #include <unordered_set>
-#include <omp.h>
+#define USE_RBLAS //for now always use the default RBLAS library
+#ifdef _OPENMP
+ #include <omp.h>
+#endif
+
 #include <time.h>
 #include <inttypes.h>
 #include <vector>

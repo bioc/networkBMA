@@ -126,8 +126,10 @@ template <class T> void findEdges(BMARetStruct *theBMARetStruct, T **data,
 	for(int i=1;i<nThreads;i++){
 		parentsSlice[i]=parentsSlice[i-1]+nGenes;
 		weightsSlice[i]=weightsSlice[i-1]+nGenes;
-	}	
- #pragma omp parallel for schedule(dynamic) num_threads(nThreads) 
+	}
+	#ifdef _OPENMP	
+  #pragma omp parallel for schedule(dynamic) num_threads(nThreads)
+ #endif
 	for(int k=0;k<evalSubset.size();k++){
 		const int th=omp_get_thread_num();
 		int nEdges=findRegulators(g,optimizeBits,maxOptimizeCycles,uniform_prob,twoLogOR,nVars,nThreads,rankOnly,evalSubset[k],data,rProbs,parentsSlice[th] ,weightsSlice[th],A,ATA, Aldr,ATAldr, nGenes,nRows,nSamples,nTimes,timeout);
