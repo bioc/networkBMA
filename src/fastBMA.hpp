@@ -31,6 +31,7 @@
 #include <boost/serialization/string.hpp>
 namespace mpi = boost::mpi;
 #endif
+
 #ifdef USE_RBLAS
  #include <blas.h> //this must go AFTER and not before the boost mpi headers for some reason
 #else 
@@ -39,10 +40,7 @@ namespace mpi = boost::mpi;
 
 #include <lapacke.h>
 //include the following because macs don't have clockgettime
-#ifdef MAC_OS
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
+
 #define UNIFORM_PRIOR 2.76/6000.0
 #define EPSILONFACTOR 1e-6 //will be added to uniform prior if correlation matrix is given to casue the variables to be ranked
 #define MAXPRIOR 0.9999999 //needed for stability
@@ -50,10 +48,6 @@ namespace mpi = boost::mpi;
 
 using namespace std;
 
-
-void current_utc_time(struct timespec *ts);
-double get_elapsed_time(const struct timespec *start_time,const struct timespec *end_time);
-bool isTimedOut(struct timespec *regStart,float timeout);
 
 //globals
 
@@ -1459,7 +1453,7 @@ template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nC
  // to search around
   int curpass=0;
   current_utc_time(&regStart);
-  while ( ((int)activeModels.size()) > 0 && (!timeout || !isTimedOut(&regStart,timeout) )) {
+  while ( (int)activeModels.size() > 0) {
    curpass++;
    for ( it = activeModels.begin(); it != activeModels.end(); it++ ){
  			copy_indices(modelIndices,it->modelIndices);
@@ -1698,13 +1692,6 @@ template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nC
 			}
 		}	
 		*npostProbs=my_npostProbs;
-		if(timeout){
-			timespec now;
-	  current_utc_time(&now);
-	  double elapsed=get_elapsed_time(&regStart,&now);
-	  Rcpp::Rcerr  << elapsed << " s for regression" << endl; 
-		}
-
 		return(-retvalue);	
 	}	
 
@@ -2107,45 +2094,9 @@ template <class T> T TimeSeriesValuesToResiduals(T *values, T *residuals,int nTi
 	return(R[8]);	
 }
 
-double get_elapsed_time(const struct timespec *start_time, const struct timespec *end_time)
-{
-    int64_t sec = end_time->tv_sec - start_time->tv_sec;
-    int64_t nsec;
-    if (end_time->tv_nsec >= start_time->tv_nsec) {
-        nsec = end_time->tv_nsec - start_time->tv_nsec;
-    } else {
-        nsec = 1000000000 - (start_time->tv_nsec - end_time->tv_nsec);
-        sec -= 1;
-    }
-    return ((double) sec + (double) nsec *1e-9);  
-}
 
-void current_utc_time(struct timespec *ts) {
-#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
-  clock_serv_t cclock;
-  mach_timespec_t mts;
-  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-  clock_get_time(cclock, &mts);
-  mach_port_deallocate(mach_task_self(), cclock);
-  ts->tv_sec = mts.tv_sec;
-  ts->tv_nsec = mts.tv_nsec;
-  return;
-#endif
-#ifdef WIN
-#else
-  clock_gettime(CLOCK_MONOTONIC_RAW, ts);
-#endif
-}
-bool isTimedOut(struct timespec *regStart,float timeout){
-	timespec now;
-	current_utc_time(&now);
-	double elapsed=get_elapsed_time(regStart,&now);
-	if(elapsed > timeout){
-		Rcpp::Rcerr  << "timed out " << elapsed <<endl;
-		return(1);
-	}
-	return(0);
-}	
+
+
 
 
 
