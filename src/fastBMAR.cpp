@@ -145,22 +145,10 @@ const List fastBMA_g(
 		edgeMin,
 		edgeTol,
 		uPrior,
-		timeout, //new***
 		start - 1, // new, negative number if not used
 		end - 1 // new, negative number if not used
 	);
-	/*cerr << "after return" << endl;
-	cerr << "address: " << bma_result << endl;
-	cerr << "nParents: " << bma_result->nParents << endl;
-	cerr << "parents: " << bma_result->parents << endl;
-	cerr << "edgeWeights: " << bma_result->edgeWeights << endl;
-	
-	cerr << bma_result->nNodes << endl;
-	for (int i = 0; i < bma_result->nNodes; i++)
-		cerr << i << ": " << bma_result->nParents[i] << endl;
-	cerr << "done c++ call" << endl;
 
-	cerr << "check point1" << endl;*/
 	//bma_result
 	float *edgeWeights = bma_result->edgeWeights;
 	int *parents = bma_result->parents;

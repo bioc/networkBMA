@@ -12,15 +12,12 @@
  #include <omp.h>
 #endif
 
-#include <time.h>
 #include <inttypes.h>
 #include <vector>
 #include <algorithm>
 #include <queue>
 #include <boost/math/tools/minima.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <time.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <bitset>
 #include "MurmurHash3.h"
@@ -39,7 +36,7 @@ namespace mpi = boost::mpi;
 #endif
 
 #include <lapacke.h>
-//include the following because macs don't have clockgettime
+
 
 #define UNIFORM_PRIOR 2.76/6000.0
 #define EPSILONFACTOR 1e-6 //will be added to uniform prior if correlation matrix is given to casue the variables to be ranked
@@ -53,14 +50,9 @@ using namespace std;
 
 //unsigned int total_checks=0;
 //unsigned int total_collisions=0;
-//timers
 
-bool gtime=0;
-struct timespec start_time;
-struct timespec end_time;
 uint32_t gMaxKeptModels=100000;
 uint32_t gMaxActiveModels=100000;
-double hashTime=0;
 
 
 uint32_t *hashLUT=0; //hash lookup table
@@ -1239,7 +1231,7 @@ float dijkstra_limit(const int source,const int destination,const float limit, f
 //class dependent globals
 
 //main subroutines
-template <class T> int findRegulators(T g,int optimizeBits,int maxOptimizeCycles,float uPrior,float twoLogOR,int nVars,int nThreads,bool rankOnly,int geneIndex,T **data,T **rProbs,int *parents, double *postProbs, T *A, T *ATA, int Aldr, int ATAldr,int nGenes,int nRows,int nSamples,int nTimes,float timeout);
+template <class T> int findRegulators(T g,int optimizeBits,int maxOptimizeCycles,float uPrior,float twoLogOR,int nVars,int nThreads,bool rankOnly,int geneIndex,T **data,T **rProbs,int *parents, double *postProbs, T *A, T *ATA, int Aldr, int ATAldr,int nGenes,int nRows,int nSamples,int nTimes);
 //template <class T> T** readPriorsMatrix(string priorsFile,int &genes);
 //template <class T> void readPriorsList(string priorsListFile,vector <string> names, T **priors, T uniform_prob);
 //EdgeList* readEdgeListFile (string edgeListFile,vector<string> &names);
@@ -1248,10 +1240,10 @@ template <class T> int findRegulators(T g,int optimizeBits,int maxOptimizeCycles
 template <class T> void initRegressParms(T *A, T *ATA, T **data,int nGenes,int nRows, int nSamples,int nTimes,int &nVars, int nThreads,bool timeSeries);
 
 //scanBMA with g prior
-template <class T> int fastScanBMA_g(T *mATA, T *mATb,T btb,T sst, int ignoreIndex, T *priorProbs,bool rankOnly,double *postProbs,int *parents, int nRows, int nCols, int nVars, double twoLogOR ,double g, int optimizeBits,int maxOptimizeCycles,float timeout);
+template <class T> int fastScanBMA_g(T *mATA, T *mATb,T btb,T sst, int ignoreIndex, T *priorProbs,bool rankOnly,double *postProbs,int *parents, int nRows, int nCols, int nVars, double twoLogOR ,double g, int optimizeBits,int maxOptimizeCycles);
 
 //routine for choosing best sets of models - repeated multiple times to optimize for parameters
-template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nCols,int *pord,T *ATb,T sst, T btb, double *postProbs, int *parents, int *npostProbs, double *logpriors,double twoLogOR,float timeout);
+template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nCols,int *pord,T *ATb,T sst, T btb, double *postProbs, int *parents, int *npostProbs, double *logpriors,double twoLogOR);
 
 //calculate the sst
 template <class T> T calculate_sst(int sizeb, T *b,T *ones);
@@ -1308,9 +1300,9 @@ void potrf(char ul ,int n,double *R,int Rldr);
 //functor for optimization - allows for just the parameter to be optimized to be exposed to the optimization library routines
 template <class T> class BMAoptimizeFunction{
   public:
-	 BMAoptimizeFunction  (T *ATA,int nVars,int nRows,int nCols,int *pord,T *ATb,T sst, T btb, double *postProbs, int *parents, int *npostProbs, double *logpriors,double twoLogOR, float timeout) : _ATA(ATA), _nVars(nVars), _nRows(nRows), _nCols(nCols), _pord(pord), _ATb (ATb), _sst (sst), _btb(btb), _postProbs(postProbs), _parents(parents), _npostProbs (npostProbs), _logpriors(logpriors), _twoLogOR(twoLogOR), _timeout(timeout){}
+	 BMAoptimizeFunction  (T *ATA,int nVars,int nRows,int nCols,int *pord,T *ATb,T sst, T btb, double *postProbs, int *parents, int *npostProbs, double *logpriors,double twoLogOR) : _ATA(ATA), _nVars(nVars), _nRows(nRows), _nCols(nCols), _pord(pord), _ATb (ATb), _sst (sst), _btb(btb), _postProbs(postProbs), _parents(parents), _npostProbs (npostProbs), _logpriors(logpriors), _twoLogOR(twoLogOR){}
 	 double operator () (double g0){
-			return(chooseBestModels <T> (g0,_ATA,_nVars,_nRows,_nCols,_pord,_ATb, _sst, _btb,_postProbs, _parents, _npostProbs, _logpriors,_twoLogOR,_timeout));
+			return(chooseBestModels <T> (g0,_ATA,_nVars,_nRows,_nCols,_pord,_ATb, _sst, _btb,_postProbs, _parents, _npostProbs, _logpriors,_twoLogOR));
 		} 
 	private:
 	T *_ATA;
@@ -1326,12 +1318,8 @@ template <class T> class BMAoptimizeFunction{
 	int *_npostProbs;
 	double *_logpriors;
 	double _twoLogOR;
-	float _timeout;
 };
-template <class T> int fastScanBMA_g(T *mATA, T *mATb,T btb,T sst, int ignoreIndex, T *priorProbs,bool rankOnly,double *postProbs,int *parents, int nRows, int nCols, int nVars, double twoLogOR ,double g, int optimizeBits,int maxOptimizeCycles,float timeout){
-	struct timespec start_time;
- struct timespec end_time;
- struct timespec regress_time;
+template <class T> int fastScanBMA_g(T *mATA, T *mATb,T btb,T sst, int ignoreIndex, T *priorProbs,bool rankOnly,double *postProbs,int *parents, int nRows, int nCols, int nVars, double twoLogOR ,double g, int optimizeBits,int maxOptimizeCycles){
  double *logpriors=new double[nVars]; //always keep this as double as the differences may be very small
  int npostProbs=0; //counter for final number of postProbs; 
  //sort indices decreasing by scores
@@ -1417,13 +1405,13 @@ template <class T> int fastScanBMA_g(T *mATA, T *mATb,T btb,T sst, int ignoreInd
 		typedef std::pair<T, T> Result;
 		double g0=g; 
 		boost::uintmax_t max_iter=maxOptimizeCycles;
-		Result r2 = boost::math::tools::brent_find_minima(BMAoptimizeFunction<T>(ATA,nVars,nRows,nCols,pord,ATb,sst,btb,postProbs,parents,&npostProbs,logpriors,twoLogOR,timeout), (T) 1, (T)nRows, optimizeBits, max_iter);
+		Result r2 = boost::math::tools::brent_find_minima(BMAoptimizeFunction<T>(ATA,nVars,nRows,nCols,pord,ATb,sst,btb,postProbs,parents,&npostProbs,logpriors,twoLogOR), (T) 1, (T)nRows, optimizeBits, max_iter);
   //std::cout << "g=" << r2.first << " f=" << r2.second << std::endl;
 	}
 	else{
 		//just use the current g		
 
-		chooseBestModels(g,ATA,nVars,nRows,nCols,pord,ATb,sst,btb,postProbs,parents,&npostProbs,logpriors,twoLogOR,timeout);
+		chooseBestModels(g,ATA,nVars,nRows,nCols,pord,ATb,sst,btb,postProbs,parents,&npostProbs,logpriors,twoLogOR);
 	}
  delete [] ATA;
  delete [] ATb;
@@ -1432,10 +1420,8 @@ template <class T> int fastScanBMA_g(T *mATA, T *mATb,T btb,T sst, int ignoreInd
  return(npostProbs);
 }
 
-template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nCols,int *pord,T *ATb,T sst, T btb, double *postProbs, int *parents, int *npostProbs, double *logpriors,double twoLogOR,float timeout){
+template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nCols,int *pord,T *ATb,T sst, T btb, double *postProbs, int *parents, int *npostProbs, double *logpriors,double twoLogOR){
   //start loop here when optimizing g0
-  timespec regStart;
-  float timespent=0; 
   DoubleHashTable gHashTable;
   std::set<ModelSet <T> > keepModels;
   std::set<ModelSet <T> > activeModels;
@@ -1452,7 +1438,6 @@ template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nC
  // Loop through while we have active models
  // to search around
   int curpass=0;
-  current_utc_time(&regStart);
   while ( (int)activeModels.size() > 0) {
    curpass++;
    for ( it = activeModels.begin(); it != activeModels.end(); it++ ){
@@ -1468,7 +1453,6 @@ template <class T> T chooseBestModels(double g,T *ATA,int nVars,int nRows,int nC
  			int ninserted=0;
  			//see which changes need to be made
  		 for (int i = 0; i < nVars; i++ ) {
-					timespec startHash,endHash;
 					const uint8_t nInsertModels=modelIndices.nModels+1;
 					const uint8_t nDeleteModels=modelIndices.nModels-1;
  			//go through active models and add or remove model i
@@ -1736,7 +1720,7 @@ template <class T> void initRegressParms(T *A, T *ATA, T **data,int nGenes,int n
 
 }	
    
-template <class T> int findRegulators(T g,int optimizeBits,int maxOptimizeCycles,float uPrior,float twoLogOR,int nVars,int nThreads,bool rankOnly,int geneIndex,T **data,T **rProbs,int *parents, double *postProbs, T *A, T *ATA, int Aldr, int ATAldr,int nGenes,int nRows,int nSamples,int nTimes,float timeout){
+template <class T> int findRegulators(T g,int optimizeBits,int maxOptimizeCycles,float uPrior,float twoLogOR,int nVars,int nThreads,bool rankOnly,int geneIndex,T **data,T **rProbs,int *parents, double *postProbs, T *A, T *ATA, int Aldr, int ATAldr,int nGenes,int nRows,int nSamples,int nTimes){
 	T *b=new T[nRows];
 	T *ATb=new T[nGenes+1];
 	T btb,sst;
@@ -1770,7 +1754,7 @@ template <class T> int findRegulators(T g,int optimizeBits,int maxOptimizeCycles
  sst=calculate_sst(nRows,b,A); //A is passed because the first column is a column of 1s which is useful to find sum of y components using the dot product 
 			//what to set twoLogOR and g to
 	int ignoreIndex =(nTimes)? -1:geneIndex;
-	int nEdges=fastScanBMA_g(ATA,ATb,btb,sst,ignoreIndex,priors,rankOnly,postProbs,parents,nRows, nGenes,nVars, twoLogOR,g,optimizeBits,maxOptimizeCycles,timeout); 
+	int nEdges=fastScanBMA_g(ATA,ATb,btb,sst,ignoreIndex,priors,rankOnly,postProbs,parents,nRows, nGenes,nVars, twoLogOR,g,optimizeBits,maxOptimizeCycles); 
  //read return and delete each of the arrays as necessary			
 	delete[] priors;
 	delete[] b;

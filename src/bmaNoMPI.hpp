@@ -26,10 +26,9 @@ template <class T> void findEdges(BMARetStruct *theBMARetStruct, T **data,
 										   float edgeMin,
 										   float edgeTol,
 										   float uPrior,
-										   float timeout,
 										   int start,
 										   int end);
-template <class T> void findDenseEdges(string evalSubsetString,string matrixFile,string priorsMatrixFile,string priorsListFile,string residualsFile,bool timeSeries,bool useResiduals,bool dynamicScheduling,bool noHeader,bool rankOnly,bool selfie,bool showPrune,bool noPrune,int nVars,int nThreads,int optimizeBits,int maxOptimizeCycles,float twoLogOR,float gPrior,float pruneEdgeMin,float pruneFilterMin,float edgeMin,float edgeTol,float uPrior,float timeout);
+template <class T> void findDenseEdges(string evalSubsetString,string matrixFile,string priorsMatrixFile,string priorsListFile,string residualsFile,bool timeSeries,bool useResiduals,bool dynamicScheduling,bool noHeader,bool rankOnly,bool selfie,bool showPrune,bool noPrune,int nVars,int nThreads,int optimizeBits,int maxOptimizeCycles,float twoLogOR,float gPrior,float pruneEdgeMin,float pruneFilterMin,float edgeMin,float edgeTol,float uPrior);
 //template <class T> void findEdges(string evalSubsetString,string matrixFile,string priorsMatrixFile,string priorsListFile,string residualsFile,bool timeSeries,bool useResiduals,bool dynamicScheduling,bool noHeader,bool rankOnly,bool selfie,bool showPrune,bool noPrune,int nVars,int nThreads,int optimizeBits,int maxOptimizeCycles,float twoLogOR,float gPrior,float pruneEdgeMin,float pruneFilterMin,float edgeMin,float edgeTol,float uPrior,float timeout){
 template <class T> void findEdges(BMARetStruct *theBMARetStruct, T **data,
                                            T **rProbs,
@@ -50,7 +49,6 @@ template <class T> void findEdges(BMARetStruct *theBMARetStruct, T **data,
 										   float edgeMin,
 										   float edgeTol,
 										   float uPrior,
-										   float timeout,
 										   int start,
 										   int end){
 	//vector<string> headers;
@@ -94,17 +92,7 @@ template <class T> void findEdges(BMARetStruct *theBMARetStruct, T **data,
 	int nGroups=nSamples / nTimes;
 	if(!timeSeries)nRows=nSamples;
 	else nRows=(nTimes-1)*nGroups;
-	
-	/*if(priorsMatrixFile == "" && priorsListFile != ""){
-		rProbs=new T*[nGenes];
-		rProbs[0]=new T [nGenes*nGenes];
-		for (int i=1;i<nGenes;i++){
-			rProbs[i]=rProbs[i]+nGenes;
-		}
-		readPriorsList(priorsListFile,headers,rProbs,uniform_prob);
- }*/
-	if(gtime)current_utc_time(&start_time);
-	
+		
 	//initialize variables
 	T g= (gPrior)? gPrior : sqrt((double)nRows);
 	T *A=new T [(nGenes+1)*nRows];
@@ -136,7 +124,7 @@ template <class T> void findEdges(BMARetStruct *theBMARetStruct, T **data,
 	#else
 	 const int th=0;
  #endif	 
-		int nEdges=findRegulators(g,optimizeBits,maxOptimizeCycles,uniform_prob,twoLogOR,nVars,nThreads,rankOnly,evalSubset[k],data,rProbs,parentsSlice[th] ,weightsSlice[th],A,ATA, Aldr,ATAldr, nGenes,nRows,nSamples,nTimes,timeout);
+		int nEdges=findRegulators(g,optimizeBits,maxOptimizeCycles,uniform_prob,twoLogOR,nVars,nThreads,rankOnly,evalSubset[k],data,rProbs,parentsSlice[th] ,weightsSlice[th],A,ATA, Aldr,ATAldr, nGenes,nRows,nSamples,nTimes);
 		int goodEdges=0;
 		for(int i=0;i<nEdges;i++){
 			if(weightsSlice[th][i] > pruneFilterMin){
@@ -188,11 +176,6 @@ template <class T> void findEdges(BMARetStruct *theBMARetStruct, T **data,
 	if(!noPrune){
 		edgeList.prune_edges(pruneFilterMin,edgeTol);
 	}
-	if(gtime){
-		current_utc_time(&end_time);
-  Rcpp::Rcerr << "elapsed time: "<< get_elapsed_time(&start_time, &end_time) << " seconds"<<endl;
-     //cerr << "hash time: " << hashTime <<endl;
- }
  delete[] hashLUT;
  hashLUT = 0;
  delete[] A;
