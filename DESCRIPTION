@@ -1,6 +1,6 @@
 Package: networkBMA
-Version: 2.13.8
-Date: 2017--1--26
+Version: 2.13.9
+Date: 2017--2--06
 Author: Chris Fraley, Wm. Chad Young, Ling-Hong Hung, Kaiyuan Shi, Ka Yee Yeung, Adrian Raftery
                (with contributions from Kenneth Lo)
 Title: Regression-based network inference using Bayesian Model
