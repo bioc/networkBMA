@@ -1,11 +1,10 @@
 citHeader("To cite package 'networkBMA' in publications use:")
      
-     desc <- packageDescription("networkBMA")
-     year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
-     vers <- paste("R package version", desc$Version)
+     year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+     vers <- paste("R package version", meta$Version)
      
      citEntry(entry="misc",
- title = "{\tt networkBMA}: Regression-bsed network inference using 
+ title = "{\tt networkBMA}: Regression-based network inference using 
                           Bayesian Model Averaging",
               author = personList(as.person("Chris Fraley"),
 				  as.person("Wm. Chad Young"),
@@ -13,7 +12,7 @@ citHeader("To cite package 'networkBMA' in publications use:")
                                   as.person("Adrian E. Raftery")),
               year = "2014",
               paste("Fraley et al. (2014)",
-"{\tt networkBMA}: Regression-bsed network inference using 
+"{\tt networkBMA}: Regression-based network inference using 
   Bayesian Model Averaging.",
 "software package (written in R) available through Bioconductor; 
 revised in 2014",
@@ -75,3 +74,38 @@ a genotyped population",
               of Regulatory Networks from Time-series Expression Data",
 		"BMC Systems Biology",
              "6:101",  sep=""))
+
+	citEntry(entry="article",
+              title =  "Fast Bayesian Inference for Gene Regulatory Networks Using ScanBMA",
+              author = personList(as.person("William Chad Young"),
+                                  as.person("Adrian E. Raftery"),
+                                  as.person("Ka Yee Yeung")),
+              year = "2014",
+   	      journal = "BMC Systems Biology",
+              volume = 8,
+		pages = 47,
+              textVersion =
+              paste("Young et al. (2014)",
+             "Fast Bayesian Inference for Gene Regulatory Networks Using ScanBMA",
+		"BMC Systems Biology",
+             "8:47",  sep=""))
+
+	citEntry(entry="article",
+              title =  "fastBMA: Scalable Network Inference and Transitive Reduction",
+              author = personList(as.person("Ling-Hong Hung"),
+				  as.person("Kaiyuan Shi"),
+				  as.person("Migao Wu"),
+				  as.person("William Chad Young"),
+                                  as.person("Adrian E. Raftery"),
+                                  as.person("Ka Yee Yeung")),
+              year = "2017",
+   	      journal = "Gigascience",
+              volume = 6,
+		number = 10,
+		pages = "1-10",
+              textVersion =
+              paste("Hung et al. (2017)",
+             "astBMA: Scalable Network Inference and Transitive Reduction",
+		"Gigascience",
+             "6(10):1-10",  sep=""))
+
