@@ -134,7 +134,7 @@ const List ScanBMA_BIC( NumericVector y,
   // Create a vector of indices sorted by the prior
   // then use that to get the correct indices
   // (decreasing)
-  arma::uvec pord = sort_index(priorProbs, 1);
+  arma::uvec pord = sort_index(priorProbs, "descend");
 
   // Compute log(prior/(1-prior))
   NumericVector logprior(H);
@@ -325,7 +325,7 @@ int i;
 // Create a vector of indices sorted by the prior
 // then use that to get the correct indices
 // (decreasing)
-arma::uvec pord = sort_index(priorProbs, 1);
+arma::uvec pord = sort_index(priorProbs, "descend");
 // Compute log(prior/(1-prior))
 NumericVector logprior(H);
 for ( int i = 0; i < H; i++ ) {
@@ -418,7 +418,7 @@ const List ScanBMA_g( NumericVector y,
   // Create a vector of indices sorted by the prior
   // then use that to get the correct indices
   // (decreasing)
-  arma::uvec pord = sort_index(priorProbs, 1);
+  arma::uvec pord = sort_index(priorProbs, "descend");
 
   // Compute log(prior/(1-prior))
   NumericVector logprior(H);
@@ -611,7 +611,7 @@ int i;
 // Create a vector of indices sorted by the prior
 // then use that to get the correct indices
 // (decreasing)
-arma::uvec pord = sort_index(priorProbs, 1);
+arma::uvec pord = sort_index(priorProbs, "descend");
 // Compute log(prior/(1-prior))
 NumericVector logprior(H);
 for ( int i = 0; i < H; i++ ) {
