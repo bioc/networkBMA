@@ -1,5 +1,5 @@
 Package: networkBMA
-Version: 2.35.0
+Version: 2.35.1
 Date: 2021--1--19
 Author: Chris Fraley, Wm. Chad Young, Ling-Hong Hung, Kaiyuan Shi, Ka Yee Yeung, Adrian Raftery
                (with contributions from Kenneth Lo)
@@ -17,3 +17,4 @@ Maintainer: Ka Yee Yeung <kayee@u.washington.edu>
 biocViews: GraphsAndNetwork, NetworkInference, GeneExpression,
         GeneTarget, Network, Bayesian
 NeedsCompilation: yes
+PackageStatus: Deprecated
