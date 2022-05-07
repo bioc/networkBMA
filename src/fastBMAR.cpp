@@ -1,7 +1,7 @@
 // [[Rcpp::depends(BH)]]
 #include <Rcpp.h>
-#include "fastBMA.hpp"
-#include "bmaNoMPI.hpp"
+#include "fastBMA.h"
+#include "bmaNoMPI.h"
 
 using namespace Rcpp;
 

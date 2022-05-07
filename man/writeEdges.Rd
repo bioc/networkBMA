@@ -8,7 +8,7 @@
    suitable as input to Cytoscape for visualization.
 }
 \usage{
-writeEdges( network, threshhold = .5, fileName = "edges.txt")
+writeEdges(network, threshhold = .5, fileName = "edges.txt")
 }
 \arguments{
   \item{network}{
@@ -42,7 +42,7 @@ writeEdges( network, threshhold = .5, fileName = "edges.txt")
 \seealso{
   \code{\link{networkBMA}}
 }
-\examples{
+\examples{ \dontrun{
 data(dream4)
 
 network <- 1
@@ -53,5 +53,5 @@ edges1ts10 <- networkBMA( data = dream4ts10[[network]][,-(1:2)],
                           nTimePoints = nTimePoints, prior.prob = 0.1)
 
 writeEdges(edges1ts10)
-}
+}}
 \keyword{models}

@@ -5,7 +5,7 @@
 #include <set>
 #include <map>
 #include <limits>
-#include "my_sort.hpp"
+#include "my_sort.h"
 #include <unordered_set>
 #define USE_RBLAS //for now always use the default RBLAS library
 #ifdef _OPENMP
@@ -16,6 +16,7 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <boost/cstdint.hpp>
 #include <boost/math/tools/minima.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <stdio.h>
@@ -615,94 +616,94 @@ class ModelIndices{
 		}			 
 };
 template <class T> class CompactModelIndices{
-	public:
-		uint_fast32_t hashValue;
-	 uint8_t modelBits=gModelBits;
-	 uint8_t nModels=0; //never more than 256 variables in a model
-	 PackedBitArray <T>  *list=0;
-	 CompactModelIndices(): hashValue(0){
-	 	list=0;
-	 	uint8_t modelBits=gModelBits; 
-	 	uint8_t nModels=0;
-	 }
-	 CompactModelIndices(size_t _modelBits,size_t _nModels) : modelBits(_modelBits),nModels(_nModels),hashValue(0){
-	 	list=new PackedBitArray<T>(modelBits,nModels);	
-	 }
-	 CompactModelIndices(const CompactModelIndices &A): hashValue(A.hashValue),modelBits(A.modelBits),nModels(A.nModels){
-		 if(list){delete list;list=0;}
-		 if(A.list){
-				list=new PackedBitArray<T>(modelBits,nModels);
-				const size_t tBits=sizeof(T)*8;
-		  size_t nWords=((modelBits*nModels) & (tBits-1)) ? (modelBits*nModels)/tBits+1: (modelBits*nModels)/tBits;
-				memmove(list->array,A.list->array,nWords*sizeof(T));
-			}
-	 }
-	 CompactModelIndices & operator = (const CompactModelIndices &rhs){
-			 hashValue=rhs.hashValue;
-			 modelBits=rhs.modelBits;
-			 nModels=rhs.nModels;
-		 if(list){delete list;list=0;}
-		 if(rhs.list){
-				list=new PackedBitArray<T>(modelBits,nModels);
-				const size_t tBits=sizeof(T)*8;
-		  size_t nWords=((modelBits*nModels) & (tBits-1)) ? (modelBits*nModels)/tBits+1: (modelBits*nModels)/tBits;
-				memmove(list->array,rhs.list->array,nWords*sizeof(T));
-			}
-			return *this;	
-	 }
-	 bool operator==(const CompactModelIndices &b)const{
-			if(nModels == b.nModels &&  hashValue == b.hashValue){
-			 return(1);
-		  BitIndex<T> bitIndex(list,modelBits,nModels);
-		  bool retvalue=bitIndex.compare(b.list,modelBits,nModels);
-    return(retvalue);
-			}	
-	  return(0);
-		}
-	 CompactModelIndices( ModelIndices &mind): nModels(mind.nModels),hashValue(mind.hashValue){
-		 if(list){delete list;list=0;}
-		 if(nModels){
-				const uint8_t modelBits=gModelBits;
-		  list=new PackedBitArray<T>(modelBits,nModels);
-    for(int i=0;i<mind.nModels;i++){
-			  list->set(modelBits,i,mind.list[i]);
-		  }
-			}
-		}
-		CompactModelIndices & operator = (const ModelIndices &rhs){
-	 	nModels=rhs.nModels;
-	 	hashValue=rhs.hashValue;
-		 if(list){delete list;list=0;}
-		 if(rhs.nModels){
-				const uint8_t modelBits=gModelBits;
-		  list=new PackedBitArray<T>(modelBits,nModels);
-    for(int i=0;i<rhs.nModels;i++){
-			  list->set(modelBits,i,rhs.list[i]);
-		  }
-			}
-			return *this;
-		}
-	 bool operator==(const ModelIndices &b)const{
-			if(nModels == b.nModels &&  hashValue == b.hashValue){
-			 return(1);
-		  BitIndex<T> bitIndex(list,modelBits,nModels);
-		  bool retvalue=bitIndex.compare(b.list,nModels);
-    return(retvalue);
-			}	
-	  return(0);	
-	 }
-	 void print_list()const{
-		 if(nModels == 0){
-		 	Rcpp::Rcerr  << "NULL" << endl;
-		 }	
-		 for(int i=0;i<nModels;i++){
-		  Rcpp::Rcerr  <<list->get(modelBits,i) << '.'; 
-		 }
-		 Rcpp::Rcerr  << endl;
-	 }
-	~CompactModelIndices(){
-		 if(list)delete list;
-	 }
+public:
+  uint8_t modelBits=gModelBits;
+  uint8_t nModels=0; //never more than 256 variables in a model
+  uint_fast32_t hashValue;
+  PackedBitArray <T>  *list=0;
+  CompactModelIndices(): hashValue(0){
+    list=0;
+    uint8_t modelBits=gModelBits; 
+    uint8_t nModels=0;
+  }
+  CompactModelIndices(size_t _modelBits,size_t _nModels) : modelBits(_modelBits),nModels(_nModels),hashValue(0){
+    list=new PackedBitArray<T>(modelBits,nModels);	
+  }
+  CompactModelIndices(const CompactModelIndices &A): hashValue(A.hashValue),modelBits(A.modelBits),nModels(A.nModels){
+    if(list){delete list;list=0;}
+    if(A.list){
+      list=new PackedBitArray<T>(modelBits,nModels);
+      const size_t tBits=sizeof(T)*8;
+      size_t nWords=((modelBits*nModels) & (tBits-1)) ? (modelBits*nModels)/tBits+1: (modelBits*nModels)/tBits;
+      memmove(list->array,A.list->array,nWords*sizeof(T));
+    }
+  }
+  CompactModelIndices & operator = (const CompactModelIndices &rhs){
+    hashValue=rhs.hashValue;
+    modelBits=rhs.modelBits;
+    nModels=rhs.nModels;
+    if(list){delete list;list=0;}
+    if(rhs.list){
+      list=new PackedBitArray<T>(modelBits,nModels);
+      const size_t tBits=sizeof(T)*8;
+      size_t nWords=((modelBits*nModels) & (tBits-1)) ? (modelBits*nModels)/tBits+1: (modelBits*nModels)/tBits;
+      memmove(list->array,rhs.list->array,nWords*sizeof(T));
+    }
+    return *this;	
+  }
+  bool operator==(const CompactModelIndices &b)const{
+    if(nModels == b.nModels &&  hashValue == b.hashValue){
+      return(1);
+      BitIndex<T> bitIndex(list,modelBits,nModels);
+      bool retvalue=bitIndex.compare(b.list,modelBits,nModels);
+      return(retvalue);
+    }	
+    return(0);
+  }
+  CompactModelIndices( ModelIndices &mind): nModels(mind.nModels),hashValue(mind.hashValue){
+    if(list){delete list;list=0;}
+    if(nModels){
+      const uint8_t modelBits=gModelBits;
+      list=new PackedBitArray<T>(modelBits,nModels);
+      for(int i=0;i<mind.nModels;i++){
+	list->set(modelBits,i,mind.list[i]);
+      }
+    }
+  }
+  CompactModelIndices & operator = (const ModelIndices &rhs){
+    nModels=rhs.nModels;
+    hashValue=rhs.hashValue;
+    if(list){delete list;list=0;}
+    if(rhs.nModels){
+      const uint8_t modelBits=gModelBits;
+      list=new PackedBitArray<T>(modelBits,nModels);
+      for(int i=0;i<rhs.nModels;i++){
+	list->set(modelBits,i,rhs.list[i]);
+      }
+    }
+    return *this;
+  }
+  bool operator==(const ModelIndices &b)const{
+    if(nModels == b.nModels &&  hashValue == b.hashValue){
+      return(1);
+      BitIndex<T> bitIndex(list,modelBits,nModels);
+      bool retvalue=bitIndex.compare(b.list,nModels);
+      return(retvalue);
+    }	
+    return(0);	
+  }
+  void print_list()const{
+    if(nModels == 0){
+      Rcpp::Rcerr  << "NULL" << endl;
+    }	
+    for(int i=0;i<nModels;i++){
+      Rcpp::Rcerr  <<list->get(modelBits,i) << '.'; 
+    }
+    Rcpp::Rcerr  << endl;
+  }
+  ~CompactModelIndices(){
+    if(list)delete list;
+  }
 };
 namespace std {
 		template <> 
